@@ -1,0 +1,35 @@
+// https://www.tutorialspoint.com/gradle/gradle_build_a_java_project.htm
+// apply plugin: 'java'
+
+plugins {
+    id 'application'
+}
+
+repositories {
+   jcenter()
+   google()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.19'
+    compile group: 'org.bitbucket.b_c', name: 'jose4j', version: '0.7.0'
+    testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.21'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'org.apache.commons:commons-dbcp2:2.7.0'
+    testImplementation 'junit:junit:4.13'
+}
+
+application {
+    mainClassName = 'com.server.Server'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.server.Server'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
