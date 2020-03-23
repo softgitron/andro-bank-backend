@@ -2,6 +2,8 @@ package com.server.routes;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.server.authentication.Authentication;
+import com.server.authentication.Token;
 import com.sun.net.httpserver.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,12 +15,27 @@ import java.util.List;
 
 public abstract class Router implements HttpHandler {
   protected final String API_PARAMETER_ERROR =
-    "Some of the parameters didn't stisfy contraint. Check API documentation.";
+    "Some of the parameters didn't satisfy contraint. Check API documentation.";
+  protected final String AUTHENTICATION_ERROR = "Authentication is invalid.";
 
-  // This should be alway updated from inherited classes
   protected HttpExchange httpExchange;
+  protected Token authorization;
 
-  protected Object decodeJson(Class toClass) {
+  // Must be alway called from inherited classes
+  @Override
+  public void handle(HttpExchange httpExchange) throws IOException {
+    this.httpExchange = httpExchange;
+    Headers headers = httpExchange.getRequestHeaders();
+    if (headers.containsKey("X-Auth-Token")) {
+      String rawToken = headers.get("X-Auth-Token").get(0);
+      authorization = Authentication.validateJWT(rawToken);
+    } else {
+      authorization = new Token(0);
+      authorization.setIsValid(false);
+    }
+  }
+
+  protected Object decodeJson(Class toClass) throws Exception {
     InputStream inputStream = httpExchange.getRequestBody();
     StringBuilder jsonBuilder = new StringBuilder();
     String jsonLine;
@@ -29,7 +46,12 @@ public abstract class Router implements HttpHandler {
         jsonBuilder.append(jsonLine.trim());
       }
     } catch (IOException e) {
-      //TODO: handle exception
+      sendResponse(
+        500,
+        "IOException while receiving.",
+        Response.ResponseType.TEXT
+      );
+      throw new Exception("IOException while receiving");
     }
     String jsonString = jsonBuilder.toString();
     Gson gson = new Gson();
@@ -37,7 +59,8 @@ public abstract class Router implements HttpHandler {
     try {
       results = gson.fromJson(jsonString, toClass);
     } catch (JsonSyntaxException e) {
-      //TODO: handle json exceptions
+      sendResponse(400, "Invalid JSON syntax.", Response.ResponseType.TEXT);
+      throw new Exception("Invalid JSON syntax.");
     }
     return results;
   }
@@ -55,6 +78,14 @@ public abstract class Router implements HttpHandler {
   }
 
   private void executeResponse(Response response) {
+    // Check data type
+    String responseData;
+    if (response.responseData instanceof String) {
+      responseData = (String) response.responseData;
+    } else {
+      Gson gson = new Gson();
+      responseData = gson.toJson(response.responseData);
+    }
     List<String> type = new ArrayList<String>();
     switch (response.responseType) {
       case TEXT:
@@ -77,9 +108,9 @@ public abstract class Router implements HttpHandler {
       OutputStream outputStream = httpExchange.getResponseBody();
       httpExchange.sendResponseHeaders(
         response.responseCode,
-        response.responseData.length()
+        responseData.length()
       );
-      outputStream.write(response.responseData.getBytes());
+      outputStream.write(responseData.getBytes());
       outputStream.flush();
       outputStream.close();
     } catch (IOException e) {

@@ -1,1 +1,0 @@
-curl -v -d '{"email":"henry.master@gmail.com","password":"Hello","phoneNumber":"2451156481","username":"Henry","firstName":"Henry","lastName":"Larson"}' -H 'Content-Type: application/json' -X POST http://localhost:8080/users/createUser --verbose

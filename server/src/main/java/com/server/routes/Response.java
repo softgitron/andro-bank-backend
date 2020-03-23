@@ -8,13 +8,13 @@ public class Response {
   }
 
   public Integer responseCode;
-  public String responseData;
+  public Object responseData;
   public String responseToken;
   public ResponseType responseType;
 
   public Response(
     Integer responseCode,
-    String responseData,
+    Object responseData,
     ResponseType responseType
   ) {
     this.responseCode = responseCode;
@@ -25,7 +25,7 @@ public class Response {
 
   public Response(
     Integer responseCode,
-    String responseData,
+    Object responseData,
     ResponseType responseType,
     String responseToken
   ) {

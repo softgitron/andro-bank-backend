@@ -1,5 +1,6 @@
 package com.server.routes;
 
+import com.server.containers.User;
 import com.server.controllers.UserController;
 import com.sun.net.httpserver.*;
 import java.io.IOException;
@@ -14,18 +15,26 @@ public class UserRouter extends Router {
 
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
-    this.httpExchange = httpExchange;
+    super.handle(httpExchange);
     String methodAddress =
       httpExchange.getRequestMethod() + " " + httpExchange.getRequestURI();
     switch (methodAddress) {
       case "POST /users/createUser":
         routeCreateUser();
         break;
+      case "POST /users/login":
+        routeLogin();
+        break;
     }
   }
 
   private void routeCreateUser() {
-    NewUser newUser = (NewUser) decodeJson(NewUser.class);
+    User newUser;
+    try {
+      newUser = (User) decodeJson(User.class);
+    } catch (Exception e) {
+      return;
+    }
 
     // Validate provided information with regexes
     // Might not be definitive solution but better than nothing.
@@ -51,13 +60,33 @@ public class UserRouter extends Router {
       sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
     }
   }
+
+  private void routeLogin() {
+    LoginUser user;
+    try {
+      user = (LoginUser) decodeJson(LoginUser.class);
+    } catch (Exception e) {
+      return;
+    }
+
+    // Validate provided information with regexes
+    // Might not be definitive solution but better than nothing.
+    if (
+      user.email.matches(EMAIL_REGEX) && user.password.matches(PASSWORD_REGEX)
+    ) {
+      // Go to controller and handle request
+      Response response = UserController.controllerLogin(
+        user.email,
+        user.password
+      );
+      sendResponse(response);
+    } else {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+    }
+  }
 }
 
-class NewUser {
-  public String username;
-  public String firstName;
-  public String lastName;
+class LoginUser {
   public String email;
-  public String phoneNumber;
   public String password;
 }

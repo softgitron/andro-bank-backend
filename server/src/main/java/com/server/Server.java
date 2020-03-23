@@ -1,6 +1,6 @@
 package com.server;
 
-import com.server.controllers.Controller;
+import com.server.authentication.Authentication;
 import com.server.database.DatabaseConnection;
 import com.server.routes.*;
 import com.sun.net.httpserver.HttpServer;
@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 class Server {
   private static final String HOST = "localhost";
@@ -27,14 +28,18 @@ class Server {
     }
 
     httpServer.createContext("/users", new UserRouter());
+    httpServer.createContext("/accounts", new AccountRouter());
 
     ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(
       10
     );
+
+    threadPoolExecutor.setKeepAliveTime(1000, TimeUnit.SECONDS);
+    threadPoolExecutor.allowCoreThreadTimeOut(true);
     httpServer.setExecutor(threadPoolExecutor);
     httpServer.start();
     DatabaseConnection.initialize();
-    Controller.initialize();
+    Authentication.initialize();
     System.out.println(String.format("Server started on port %d", PORT));
   }
 }
