@@ -34,7 +34,7 @@ CREATE TABLE olio1.Users
     userName VARCHAR(15) NOT NULL,
     firstName VARCHAR(15) NOT NULL,
     lastName VARCHAR(15) NOT NULL,
-    email VARCHAR(30) NOT NULL,
+    email VARCHAR(30) NOT NULL UNIQUE,
     phoneNumber VARCHAR(12) NOT NULL,
     password CHAR(60) NOT NULL,
     bankId INT NOT NULL,

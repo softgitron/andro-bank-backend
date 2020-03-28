@@ -15,7 +15,15 @@ public class AccountRouter extends Router {
       case "POST /accounts/createAccount":
         routeCreateAccount();
         break;
+      case "GET /accounts/getbanks":
+        routeGetBanks();
+        break;
     }
+  }
+
+  private void routeGetBanks(){
+    Response response = AccountController.controllerRetrieveBanks();
+    sendResponse(response);
   }
 
   private void routeCreateAccount() {

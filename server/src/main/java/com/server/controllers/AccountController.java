@@ -1,9 +1,11 @@
 package com.server.controllers;
 
 import com.server.authentication.Token;
+import com.server.containers.Bank;
 import com.server.database.AccountDatabase;
 import com.server.routes.Response;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class AccountController extends Controller {
@@ -29,6 +31,15 @@ public class AccountController extends Controller {
       returnValues.accountId = accountId;
       returnValues.iban = iban;
       return new Response(201, returnValues, Response.ResponseType.JSON);
+    } catch (SQLException e) {
+      return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
+    }
+  }
+
+  public static Response controllerRetrieveBanks() {
+    try {
+      ArrayList<Bank> banks = AccountDatabase.retrieveBanks();
+      return new Response(201, banks, Response.ResponseType.JSON);
     } catch (SQLException e) {
       return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
     }
