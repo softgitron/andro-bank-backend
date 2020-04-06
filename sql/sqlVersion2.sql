@@ -88,9 +88,9 @@ CREATE TABLE olio1.CardPayment
     FOREIGN KEY (cardId)
         REFERENCES olio1.Card (cardId)
         ON DELETE CASCADE
-);
+);*/
 
-CREATE TABLE olio1.Transfer
+CREATE TABLE olio1.MasterTransfer
 (
     transferId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     fromId INT NOT NULL,
@@ -105,24 +105,7 @@ CREATE TABLE olio1.Transfer
         REFERENCES olio1.Account (accountId)
         ON DELETE CASCADE
 );
-*/
 
-/*New payment table*/
-CREATE TABLE olio1.MasterTransfer
-(
-    transferId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    fromId INT NOT NULL,
-    toId INT NOT NULL,
-    amount INT NOT NULL,
-    date DATE NOT NULL,
-    type 
-    FOREIGN KEY (fromId)
-        REFERENCES olio1.Account (accountId)
-        ON DELETE NO ACTION,
-    FOREIGN KEY (toId)
-        REFERENCES olio1.Account (accountId)
-        ON DELETE CASCADE
-);
 
 
 /* Default banks. */
