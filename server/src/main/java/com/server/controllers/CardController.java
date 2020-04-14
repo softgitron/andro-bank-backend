@@ -3,7 +3,6 @@ package com.server.controllers;
 import com.server.authentication.Token;
 import com.server.containers.Account;
 import com.server.containers.Card;
-import com.server.database.AccountDatabase;
 import com.server.database.CardDatabase;
 import com.server.routes.Response;
 import com.server.routes.Router;
@@ -39,18 +38,7 @@ public class CardController extends Controller {
     Token authorization
   ) {
     try {
-      // Check that user actually owns the table
-      ArrayList<Account> accounts = AccountDatabase.retrieveAccounts(
-        authorization.userId
-      );
-      Boolean flag = false;
-      for (Account accountCandidate : accounts) {
-        if (accountCandidate.accountId == account.accountId) {
-          flag = true;
-          break;
-        }
-      }
-      if (!flag) {
+      if (!userOwnsAccount(account.accountId, authorization.userId)) {
         return new Response(
           401,
           Router.AUTHENTICATION_ERROR,

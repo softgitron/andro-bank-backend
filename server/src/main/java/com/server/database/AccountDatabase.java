@@ -61,11 +61,33 @@ public class AccountDatabase {
   public static ArrayList<Account> retrieveAccounts(Integer userId)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
-
     PreparedStatement statement = connection.prepareStatement(
       "SELECT accountId, iban, balance FROM Account WHERE userId=?"
     );
     statement.setInt(1, userId);
+    ArrayList<Account> results = getAccounts(statement);
+    connection.close();
+    return results;
+  }
+
+  public static ArrayList<Account> retrieveAccounts(
+    Integer userId,
+    Integer accountId
+  )
+    throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+    PreparedStatement statement = connection.prepareStatement(
+      "SELECT accountId, iban, balance FROM Account WHERE userId=? AND accountId=?"
+    );
+    statement.setInt(1, userId);
+    statement.setInt(2, accountId);
+    ArrayList<Account> results = getAccounts(statement);
+    connection.close();
+    return results;
+  }
+
+  private static ArrayList<Account> getAccounts(PreparedStatement statement)
+    throws SQLException {
     ResultSet results = statement.executeQuery();
     ArrayList<Account> accounts = new ArrayList<Account>();
     while (results.next() != false) {
@@ -77,7 +99,26 @@ public class AccountDatabase {
     }
     results.close();
     statement.close();
-    connection.close();
     return accounts;
+  }
+
+  public static void updateBalance(
+    Integer accountId,
+    Integer balance,
+    Integer userId
+  )
+    throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+
+    PreparedStatement statement = connection.prepareStatement(
+      "UPDATE Account SET balance = ? WHERE accountId = ? AND userId = ?"
+    );
+    statement.setInt(1, balance);
+    statement.setInt(2, accountId);
+    statement.setInt(3, userId);
+    statement.executeUpdate();
+
+    statement.close();
+    connection.close();
   }
 }

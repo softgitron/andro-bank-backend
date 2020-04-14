@@ -4,6 +4,7 @@ import json
 import time
 
 c = connection.Connection()
+temporary_values = {}
 
 
 def test_001():
@@ -50,22 +51,17 @@ def test_005():
     json_data = "{}"
     return_value = '[{"accountId":*,"iban":"*","balance":0},{"accountId":*,"iban":"*","balance":0}]'
     r = c.new_request(
-        "POST", "/accounts/getAccounts", payload=json_data, authentication=True
+        "GET", "/accounts/getAccounts", payload=json_data, authentication=True
     )
+    accounts = json.loads(r.text)
+    temporary_values["accountId"] = accounts[0].get("accountId")
     return expect(r, code=200, return_value=return_value, wildcard_maximum=24)
 
 
 def test_006():
     print("Create new card")
-    json_data = "{}"
-    # Get id for the first account
-    r = c.new_request(
-        "POST", "/accounts/getAccounts", payload=json_data, authentication=True
-    )
-    accounts = json.loads(r.text)
-    account_id = accounts[0].get("accountId")
-    json_data = f'{{"accountId":{account_id},"spendingLimit": 6}}'
-    return_value = f'{{"cardId":*,"accountId":{account_id},"withdrawLimit":0,"spendingLimit":6,"area":""}}'
+    json_data = f'{{"accountId":{temporary_values["accountId"]},"spendingLimit": 6}}'
+    return_value = f'{{"cardId":*,"accountId":{temporary_values["accountId"]},"withdrawLimit":0,"spendingLimit":6,"area":""}}'
     r = c.new_request(
         "POST", "/cards/createCard", payload=json_data, authentication=True
     )
@@ -74,14 +70,7 @@ def test_006():
 
 def test_007():
     print("Get all cards for specific account.")
-    json_data = "{}"
-    # Get id for the first account
-    r = c.new_request(
-        "POST", "/accounts/getAccounts", payload=json_data, authentication=True
-    )
-    accounts = json.loads(r.text)
-    account_id = accounts[0].get("accountId")
-    json_data = f'{{"accountId":{account_id}}}'
+    json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
     return_value = '[{"cardId":*,"withdrawLimit":0,"spendingLimit":6,"area":""}]'
     r = c.new_request("GET", "/cards/getCards", payload=json_data, authentication=True)
     return expect(r, code=200, return_value=return_value)
@@ -101,6 +90,26 @@ def test_009():
     )
     return_value = '{"username":"Henry","firstName":"Henry","lastName":"Harson","email":"super@gmail.com","phoneNumber":"2452256481"}'
     r = c.new_request(
-        "POST", "/users/updateUserDetails", payload=json_data, authentication=True
+        "PATCH", "/users/updateUserDetails", payload=json_data, authentication=True
     )
     return expect(r, code=200, return_value=return_value)
+
+
+def test_010():
+    print("Add more balance to account")
+    json_data = f'{{"balance":50000,"accountId":{temporary_values["accountId"]}}}'
+    return_value = '{"accountId":*,"iban":"*","balance":50000}'
+    r = c.new_request(
+        "POST", "/accounts/addBalance", payload=json_data, authentication=True
+    )
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=24)
+
+
+def test_011():
+    print("Get all transactions (1)")
+    json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
+    return_value = '[{"toId":*,"amount":50000,"time":"*","type":"DepWit"}]'
+    r = c.new_request(
+        "GET", "/transactions/getTransactions", payload=json_data, authentication=True
+    )
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=30)

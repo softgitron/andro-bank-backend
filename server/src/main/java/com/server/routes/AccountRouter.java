@@ -1,5 +1,6 @@
 package com.server.routes;
 
+import com.server.containers.Account;
 import com.server.controllers.AccountController;
 import com.sun.net.httpserver.*;
 import java.io.IOException;
@@ -16,8 +17,11 @@ public class AccountRouter extends Router {
       case "POST /accounts/createAccount":
         routeCreateAccount();
         break;
-      case "POST /accounts/getAccounts":
+      case "GET /accounts/getAccounts":
         routeGetAccounts();
+        break;
+      case "POST /accounts/addBalance":
+        routeAddBalance();
         break;
       default:
         sendResponse(400, BAD_PATH, Response.ResponseType.TEXT);
@@ -31,24 +35,48 @@ public class AccountRouter extends Router {
   }
 
   private void routeCreateAccount() {
-    if (authorization.getIsValid()) {
-      Response response = AccountController.controllerCreateAccount(
-        authorization
-      );
-      sendResponse(response);
-    } else {
+    if (!authorization.getIsValid()) {
       sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
+      return;
     }
+    Response response = AccountController.controllerCreateAccount(
+      authorization
+    );
+    sendResponse(response);
   }
 
   private void routeGetAccounts() {
-    if (authorization.getIsValid()) {
-      Response response = AccountController.controllerGetAccounts(
-        authorization
-      );
-      sendResponse(response);
-    } else {
+    if (!authorization.getIsValid()) {
       sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
+      return;
     }
+    Response response = AccountController.controllerGetAccounts(authorization);
+    sendResponse(response);
+  }
+
+  private void routeAddBalance() {
+    if (!authorization.getIsValid()) {
+      sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    Account account;
+    try {
+      account = (Account) decodeJson(Account.class);
+    } catch (Exception e) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    if (account.accountId == null || account.balance == null) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    Response response = AccountController.controllerAddBalance(
+      account,
+      authorization
+    );
+    sendResponse(response);
   }
 }

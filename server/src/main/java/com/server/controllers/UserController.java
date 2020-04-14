@@ -52,7 +52,7 @@ public class UserController extends Controller {
     // Retrieve old user details for combining details
     User oldUserDetails;
     try {
-      oldUserDetails = UserDatabase.retrieveUser(authorization.userId, null);
+      oldUserDetails = UserDatabase.retrieveUser(authorization.userId);
     } catch (SQLException e) {
       return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
     }
@@ -111,7 +111,7 @@ public class UserController extends Controller {
 
   public static Response controllerLogin(String email, String password) {
     try {
-      User user = UserDatabase.retrieveUser(null, email);
+      User user = UserDatabase.retrieveUser(email);
       String[] information = user.password.split("\\$", 2);
       byte[] hash = Base64.decode(information[0]);
       byte[] salt = Base64.decode(information[1]);

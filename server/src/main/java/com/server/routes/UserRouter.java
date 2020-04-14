@@ -20,7 +20,7 @@ public class UserRouter extends Router {
       case "POST /users/createUser":
         routeCreateUser();
         break;
-      case "POST /users/updateUserDetails":
+      case "PATCH /users/updateUserDetails":
         routeUpdateUserDetails();
         break;
       case "POST /users/login":

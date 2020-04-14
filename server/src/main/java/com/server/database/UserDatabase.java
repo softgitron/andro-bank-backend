@@ -76,28 +76,38 @@ public class UserDatabase {
     return;
   }
 
-  // Either userId or email should be present
-  public static User retrieveUser(Integer userId, String email)
-    throws SQLException {
+  public static User retrieveUser(Integer userId) throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
     // https://alvinalexander.com/java/edu/pj/jdbc/jdbc0003/
     PreparedStatement statement;
-    if (userId != null) {
-      statement =
-        connection.prepareStatement(
-          "SELECT userId, userName, firstName, lastName, email, phoneNumber, password, bankId FROM Users WHERE (userId = ?)"
-        );
-      statement.setInt(1, userId);
-    } else if (email != null) {
-      statement =
-        connection.prepareStatement(
-          "SELECT userId, userName, firstName, lastName, email, phoneNumber, password, bankId FROM Users WHERE (email = ?)"
-        );
-      statement.setString(1, email);
-    } else {
-      throw new SQLException("No userId or email provided.");
-    }
+    statement =
+      connection.prepareStatement(
+        "SELECT userId, userName, firstName, lastName, email, phoneNumber, password, bankId FROM Users WHERE (userId = ?)"
+      );
+    statement.setInt(1, userId);
+    User results = extractUserInformation(statement);
+    connection.close();
+    return results;
+  }
+
+  public static User retrieveUser(String email) throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+
+    // https://alvinalexander.com/java/edu/pj/jdbc/jdbc0003/
+    PreparedStatement statement;
+    statement =
+      connection.prepareStatement(
+        "SELECT userId, userName, firstName, lastName, email, phoneNumber, password, bankId FROM Users WHERE (email = ?)"
+      );
+    statement.setString(1, email);
+    User results = extractUserInformation(statement);
+    connection.close();
+    return results;
+  }
+
+  private static User extractUserInformation(PreparedStatement statement)
+    throws SQLException {
     ResultSet results = statement.executeQuery();
     results.next();
     User user = new User();
@@ -111,7 +121,6 @@ public class UserDatabase {
     user.bankId = results.getInt(8);
     results.close();
     statement.close();
-    connection.close();
     return user;
   }
 }

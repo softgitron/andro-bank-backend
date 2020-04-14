@@ -66,13 +66,15 @@ CREATE TABLE olio1.Card
         ON DELETE CASCADE
 );
 
+/* Fromid can be null for example in case of deposit. */
+
 CREATE TABLE olio1.MasterTransfer
 (
     transferId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    fromId INT NOT NULL,
+    fromId INT,
     toId INT NOT NULL,
     amount INT NOT NULL,
-    date DATE NOT NULL,
+    time TIMESTAMP NOT NULL,
     type ENUM ('Transfer', 'DepWit', 'Payment'),
     FOREIGN KEY (fromId)
         REFERENCES olio1.Account (accountId)
