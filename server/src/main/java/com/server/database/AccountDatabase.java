@@ -1,13 +1,13 @@
 package com.server.database;
 
+import com.server.containers.Account;
+import com.server.containers.Bank;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
-import com.server.containers.Bank;
 
 public class AccountDatabase {
 
@@ -25,7 +25,9 @@ public class AccountDatabase {
     statement.setInt(3, 0);
     statement.executeUpdate();
     ResultSet results = statement.getGeneratedKeys();
-    results.next();
+    if (!results.next()) {
+      throw new SQLException("No generated id");
+    }
     Integer accountId = results.getInt(1);
     results.close();
     statement.close();
@@ -53,6 +55,29 @@ public class AccountDatabase {
     statement.close();
     connection.close();
     return banks;
+  }
 
+  // Retrieve all accounts for specific user
+  public static ArrayList<Account> retrieveAccounts(Integer userId)
+    throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+
+    PreparedStatement statement = connection.prepareStatement(
+      "SELECT accountId, iban, balance FROM Account WHERE userId=?"
+    );
+    statement.setInt(1, userId);
+    ResultSet results = statement.executeQuery();
+    ArrayList<Account> accounts = new ArrayList<Account>();
+    while (results.next() != false) {
+      Account account = new Account();
+      account.accountId = results.getInt(1);
+      account.iban = results.getString(2);
+      account.balance = results.getInt(3);
+      accounts.add(account);
+    }
+    results.close();
+    statement.close();
+    connection.close();
+    return accounts;
   }
 }

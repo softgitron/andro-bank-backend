@@ -66,6 +66,22 @@ CREATE TABLE olio1.Card
         ON DELETE CASCADE
 );
 
+CREATE TABLE olio1.MasterTransfer
+(
+    transferId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fromId INT NOT NULL,
+    toId INT NOT NULL,
+    amount INT NOT NULL,
+    date DATE NOT NULL,
+    type ENUM ('Transfer', 'DepWit', 'Payment'),
+    FOREIGN KEY (fromId)
+        REFERENCES olio1.Account (accountId)
+        ON DELETE NO ACTION,
+    FOREIGN KEY (toId)
+        REFERENCES olio1.Account (accountId)
+        ON DELETE CASCADE
+);
+
 /*CREATE TABLE olio1.DepWit
 (
     depwitId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -89,24 +105,6 @@ CREATE TABLE olio1.CardPayment
         REFERENCES olio1.Card (cardId)
         ON DELETE CASCADE
 );*/
-
-CREATE TABLE olio1.MasterTransfer
-(
-    transferId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    fromId INT NOT NULL,
-    toId INT NOT NULL,
-    amount INT NOT NULL,
-    date DATE NOT NULL,
-    type VARCHAR(15) CHECK (type = 'Transfer', type = 'DepWit', type = 'Payment'),
-    FOREIGN KEY (fromId)
-        REFERENCES olio1.Account (accountId)
-        ON DELETE NO ACTION,
-    FOREIGN KEY (toId)
-        REFERENCES olio1.Account (accountId)
-        ON DELETE CASCADE
-);
-
-
 
 /* Default banks. */
 INSERT INTO olio1.Bank VALUES (0, "Deals", "DEALFIHH");

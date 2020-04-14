@@ -14,17 +14,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Router implements HttpHandler {
-  protected final String API_PARAMETER_ERROR =
+  public static final String API_PARAMETER_ERROR =
     "Some of the parameters didn't satisfy contraint. Check API documentation.";
-  protected final String AUTHENTICATION_ERROR = "Authentication is invalid.";
+  public static final String BAD_PATH =
+    "Path does not exist. Check that you have entered correct details.";
+  public static final String AUTHENTICATION_ERROR =
+    "Authentication is invalid.";
 
   protected HttpExchange httpExchange;
   protected Token authorization;
+  protected String methodAddress;
 
   // Must be alway called from inherited classes
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
     this.httpExchange = httpExchange;
+    this.methodAddress =
+      httpExchange.getRequestMethod() + " " + httpExchange.getRequestURI();
     Headers headers = httpExchange.getRequestHeaders();
     if (headers.containsKey("X-Auth-Token")) {
       String rawToken = headers.get("X-Auth-Token").get(0);

@@ -29,6 +29,7 @@ class Server {
 
     httpServer.createContext("/users", new UserRouter());
     httpServer.createContext("/accounts", new AccountRouter());
+    httpServer.createContext("/cards", new CardRouter());
 
     ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(
       10

@@ -11,6 +11,7 @@ public class UserDatabase {
 
   // https://stackoverflow.com/questions/1812891/java-escape-string-to-prevent-sql-injection
   public static Integer insertUser(
+    Integer bankId,
     String username,
     String firstName,
     String lastName,
@@ -33,7 +34,7 @@ public class UserDatabase {
     statement.setString(4, email);
     statement.setString(5, phoneNumber);
     statement.setString(6, hashedPassword);
-    statement.setInt(7, 0);
+    statement.setInt(7, bankId);
     statement.executeUpdate();
 
     // https://docs.oracle.com/javase/tutorial/jdbc/basics/retrieving.html
@@ -48,14 +49,55 @@ public class UserDatabase {
     return userId;
   }
 
-  public static User retrieveUser(String email) throws SQLException {
+  public static void updateUser(
+    String username,
+    String firstName,
+    String lastName,
+    String email,
+    String phoneNumber,
+    String hashedPassword
+  )
+    throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+
+    PreparedStatement statement = connection.prepareStatement(
+      "UPDATE Users SET userName = ?, firstName = ?, lastName = ?, email = ?, phoneNumber = ?, password = ?"
+    );
+    statement.setString(1, username);
+    statement.setString(2, firstName);
+    statement.setString(3, lastName);
+    statement.setString(4, email);
+    statement.setString(5, phoneNumber);
+    statement.setString(6, hashedPassword);
+    statement.executeUpdate();
+
+    statement.close();
+    connection.close();
+    return;
+  }
+
+  // Either userId or email should be present
+  public static User retrieveUser(Integer userId, String email)
+    throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
     // https://alvinalexander.com/java/edu/pj/jdbc/jdbc0003/
-    PreparedStatement statement = connection.prepareStatement(
-      "SELECT userId, userName, firstName, lastName, email, phoneNumber, password, bankId FROM Users WHERE (email = ?)"
-    );
-    statement.setString(1, email);
+    PreparedStatement statement;
+    if (userId != null) {
+      statement =
+        connection.prepareStatement(
+          "SELECT userId, userName, firstName, lastName, email, phoneNumber, password, bankId FROM Users WHERE (userId = ?)"
+        );
+      statement.setInt(1, userId);
+    } else if (email != null) {
+      statement =
+        connection.prepareStatement(
+          "SELECT userId, userName, firstName, lastName, email, phoneNumber, password, bankId FROM Users WHERE (email = ?)"
+        );
+      statement.setString(1, email);
+    } else {
+      throw new SQLException("No userId or email provided.");
+    }
     ResultSet results = statement.executeQuery();
     results.next();
     User user = new User();

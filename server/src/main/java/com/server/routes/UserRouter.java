@@ -16,14 +16,18 @@ public class UserRouter extends Router {
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
     super.handle(httpExchange);
-    String methodAddress =
-      httpExchange.getRequestMethod() + " " + httpExchange.getRequestURI();
     switch (methodAddress) {
       case "POST /users/createUser":
         routeCreateUser();
         break;
+      case "POST /users/updateUserDetails":
+        routeUpdateUserDetails();
+        break;
       case "POST /users/login":
         routeLogin();
+        break;
+      default:
+        sendResponse(400, BAD_PATH, Response.ResponseType.TEXT);
         break;
     }
   }
@@ -33,12 +37,19 @@ public class UserRouter extends Router {
     try {
       newUser = (User) decodeJson(User.class);
     } catch (Exception e) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
       return;
     }
 
     // Validate provided information with regexes
     // Might not be definitive solution but better than nothing.
     if (
+      newUser.username != null &&
+      newUser.firstName != null &&
+      newUser.lastName != null &&
+      newUser.email != null &&
+      newUser.phoneNumber != null &&
+      newUser.password != null &&
       newUser.username.matches(USERNAME_REGEX) &&
       newUser.firstName.matches(NAME_REGEX) &&
       newUser.lastName.matches(NAME_REGEX) &&
@@ -47,13 +58,43 @@ public class UserRouter extends Router {
       newUser.password.matches(PASSWORD_REGEX)
     ) {
       // Go to controller and handle request
-      Response response = UserController.controllerCreateUser(
-        newUser.username,
-        newUser.firstName,
-        newUser.lastName,
-        newUser.email,
-        newUser.phoneNumber,
-        newUser.password
+      Response response = UserController.controllerCreateUser(newUser);
+      sendResponse(response);
+    } else {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+    }
+  }
+
+  private void routeUpdateUserDetails() {
+    if (!authorization.getIsValid()) {
+      sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    User user;
+    try {
+      user = (User) decodeJson(User.class);
+    } catch (Exception e) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    // Validate provided information with regexes
+    // Might not be definitive solution but better than nothing.
+    if (
+      (user.username == null || user.username.matches(USERNAME_REGEX)) &&
+      (user.firstName == null || user.firstName.matches(NAME_REGEX)) &&
+      (user.lastName == null || user.lastName.matches(NAME_REGEX)) &&
+      (user.email == null || user.email.matches(EMAIL_REGEX)) &&
+      (
+        user.phoneNumber == null || user.phoneNumber.matches(PHONE_NUMBER_REGEX)
+      ) &&
+      (user.password == null || user.password.matches(PASSWORD_REGEX))
+    ) {
+      // Go to controller and handle request
+      Response response = UserController.controllerUpdateUserDetails(
+        user,
+        authorization
       );
       sendResponse(response);
     } else {
@@ -62,10 +103,11 @@ public class UserRouter extends Router {
   }
 
   private void routeLogin() {
-    LoginUser user;
+    User user;
     try {
-      user = (LoginUser) decodeJson(LoginUser.class);
+      user = (User) decodeJson(User.class);
     } catch (Exception e) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
       return;
     }
 
@@ -84,9 +126,4 @@ public class UserRouter extends Router {
       sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
     }
   }
-}
-
-class LoginUser {
-  public String email;
-  public String password;
 }

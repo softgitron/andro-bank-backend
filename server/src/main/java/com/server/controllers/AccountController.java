@@ -1,6 +1,7 @@
 package com.server.controllers;
 
 import com.server.authentication.Token;
+import com.server.containers.Account;
 import com.server.containers.Bank;
 import com.server.database.AccountDatabase;
 import com.server.routes.Response;
@@ -9,6 +10,15 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class AccountController extends Controller {
+
+  public static Response controllerRetrieveBanks() {
+    try {
+      ArrayList<Bank> banks = AccountDatabase.retrieveBanks();
+      return new Response(200, banks, Response.ResponseType.JSON);
+    } catch (SQLException e) {
+      return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
+    }
+  }
 
   public static Response controllerCreateAccount(Token authorization) {
     // Let's generate new iban
@@ -27,26 +37,24 @@ public class AccountController extends Controller {
         authorization.userId,
         iban
       );
-      NewAccount returnValues = new NewAccount();
+      Account returnValues = new Account();
       returnValues.accountId = accountId;
       returnValues.iban = iban;
+      returnValues.balance = 0;
       return new Response(201, returnValues, Response.ResponseType.JSON);
     } catch (SQLException e) {
       return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
     }
   }
 
-  public static Response controllerRetrieveBanks() {
+  public static Response controllerGetAccounts(Token authorization) {
     try {
-      ArrayList<Bank> banks = AccountDatabase.retrieveBanks();
-      return new Response(201, banks, Response.ResponseType.JSON);
+      ArrayList<Account> accounts = AccountDatabase.retrieveAccounts(
+        authorization.userId
+      );
+      return new Response(200, accounts, Response.ResponseType.JSON);
     } catch (SQLException e) {
       return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
     }
   }
-}
-
-class NewAccount {
-  public Integer accountId;
-  public String iban;
 }

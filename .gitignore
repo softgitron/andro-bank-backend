@@ -1,3 +1,7 @@
+# No passwords
 db_password.txt
 db_root_password.txt
 JWT_key.key
+
+# No python caches
+/test/__pycache__/
