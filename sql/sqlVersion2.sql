@@ -49,6 +49,7 @@ CREATE TABLE olio1.Account
     userId INT NOT NULL,
     iban VARCHAR(30) NOT NULL,
     balance INT,
+    type ENUM ('Savings', 'Credit', 'Normal'),
     FOREIGN KEY (userId)
         REFERENCES olio1.Users (userId)
         ON DELETE CASCADE
@@ -57,9 +58,10 @@ CREATE TABLE olio1.Account
 CREATE TABLE olio1.Card
 (
     cardId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    cardNumber CHAR(19) NOT NULL,
     accountId INT NOT NULL,
-    withdraw_limit INT,
-    spending_limit INT,
+    withdrawLimit INT,
+    spendingLimit INT,
     area VARCHAR(15),
     FOREIGN KEY (accountId)
         REFERENCES olio1.Account (accountId)
@@ -71,17 +73,21 @@ CREATE TABLE olio1.Card
 CREATE TABLE olio1.MasterTransfer
 (
     transferId INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    fromId INT,
-    toId INT NOT NULL,
+    fromAccountId INT,
+    toAccountId INT,
+    cardId INT,
     amount INT NOT NULL,
     time TIMESTAMP NOT NULL,
-    type ENUM ('Transfer', 'DepWit', 'Payment'),
-    FOREIGN KEY (fromId)
+    type ENUM ('Transfer', 'Deposit', 'Withdraw', 'Payment') NOT NULL,
+    FOREIGN KEY (fromAccountId)
         REFERENCES olio1.Account (accountId)
         ON DELETE NO ACTION,
-    FOREIGN KEY (toId)
+    FOREIGN KEY (toAccountId)
         REFERENCES olio1.Account (accountId)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (cardId)
+        REFERENCES olio1.Card (cardId)
+        ON DELETE NO ACTION
 );
 
 /*CREATE TABLE olio1.DepWit

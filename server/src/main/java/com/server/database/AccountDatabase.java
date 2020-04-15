@@ -12,17 +12,22 @@ import java.util.ArrayList;
 public class AccountDatabase {
 
   // https://stackoverflow.com/questions/1812891/java-escape-string-to-prevent-sql-injection
-  public static Integer insertAccount(Integer userId, String iban)
+  public static Integer insertAccount(
+    Integer userId,
+    String iban,
+    Account.AccountType type
+  )
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
     PreparedStatement statement = connection.prepareStatement(
-      "INSERT INTO Account (userId, iban, balance) values (?, ?, ?)",
+      "INSERT INTO Account (userId, iban, balance, type) values (?, ?, ?, ?)",
       Statement.RETURN_GENERATED_KEYS
     );
     statement.setInt(1, userId);
     statement.setString(2, iban);
     statement.setInt(3, 0);
+    statement.setString(4, type.name());
     statement.executeUpdate();
     ResultSet results = statement.getGeneratedKeys();
     if (!results.next()) {
@@ -62,7 +67,7 @@ public class AccountDatabase {
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
     PreparedStatement statement = connection.prepareStatement(
-      "SELECT accountId, iban, balance FROM Account WHERE userId=?"
+      "SELECT accountId, iban, balance, type FROM Account WHERE userId=?"
     );
     statement.setInt(1, userId);
     ArrayList<Account> results = getAccounts(statement);
@@ -77,10 +82,22 @@ public class AccountDatabase {
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
     PreparedStatement statement = connection.prepareStatement(
-      "SELECT accountId, iban, balance FROM Account WHERE userId=? AND accountId=?"
+      "SELECT accountId, iban, balance, type FROM Account WHERE userId=? AND accountId=?"
     );
     statement.setInt(1, userId);
     statement.setInt(2, accountId);
+    ArrayList<Account> results = getAccounts(statement);
+    connection.close();
+    return results;
+  }
+
+  public static ArrayList<Account> retrieveAccounts(String accountIban)
+    throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+    PreparedStatement statement = connection.prepareStatement(
+      "SELECT accountId, iban, balance, type FROM Account WHERE iban=?"
+    );
+    statement.setString(1, accountIban);
     ArrayList<Account> results = getAccounts(statement);
     connection.close();
     return results;
@@ -95,6 +112,7 @@ public class AccountDatabase {
       account.accountId = results.getInt(1);
       account.iban = results.getString(2);
       account.balance = results.getInt(3);
+      account.type = Account.AccountType.valueOf(results.getString(4));
       accounts.add(account);
     }
     results.close();
@@ -116,6 +134,21 @@ public class AccountDatabase {
     statement.setInt(1, balance);
     statement.setInt(2, accountId);
     statement.setInt(3, userId);
+    statement.executeUpdate();
+
+    statement.close();
+    connection.close();
+  }
+
+  public static void updateType(Integer accountId, Account.AccountType type)
+    throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+
+    PreparedStatement statement = connection.prepareStatement(
+      "UPDATE Account SET type = ? WHERE accountId = ?"
+    );
+    statement.setString(1, type.name());
+    statement.setInt(2, accountId);
     statement.executeUpdate();
 
     statement.close();

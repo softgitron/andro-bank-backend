@@ -10,39 +10,31 @@ import java.util.ArrayList;
 
 public class TransactionDatabase {
 
-  public enum TransactionType {
-    Transfer,
-    DepWit,
-    Payment
-  }
-
   public static void insertTransaction(
-    Integer fromId,
-    Integer toId,
+    Integer fromAccountId,
+    Integer toAccountId,
+    Integer cardId,
     Integer amount,
-    TransactionType type
+    Transaction.TransactionType type
   )
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
     PreparedStatement statement = connection.prepareStatement(
-      "INSERT INTO MasterTransfer (fromId, toId, amount, time, type) values (?, ?, ?, ?, ?)"
+      "INSERT INTO MasterTransfer (fromAccountId, toAccountId, cardId, amount, time, type) values (?, ?, ?, ?, ?, ?)"
     );
-    if (fromId != null) {
-      statement.setInt(1, fromId);
-    } else {
-      // https://stackoverflow.com/questions/18449708/how-to-insert-null-in-mysql-especially-int-datatype
-      statement.setNull(1, Types.INTEGER);
-    }
-    statement.setInt(2, toId);
-    statement.setInt(3, amount);
+
+    setNullInt(statement, 1, fromAccountId);
+    setNullInt(statement, 2, toAccountId);
+    setNullInt(statement, 3, cardId);
+    statement.setInt(4, amount);
 
     // https://stackoverflow.com/questions/18614836/using-setdate-in-preparedstatement
     statement.setTimestamp(
-      4,
+      5,
       java.sql.Timestamp.valueOf(java.time.LocalDateTime.now())
     );
-    statement.setString(5, type.name());
+    statement.setString(6, type.name());
     statement.executeUpdate();
 
     statement.close();
@@ -50,12 +42,35 @@ public class TransactionDatabase {
     return;
   }
 
+  private static void setNullInt(
+    PreparedStatement statement,
+    Integer index,
+    Integer value
+  )
+    throws SQLException {
+    if (value != null) {
+      statement.setInt(index, value);
+    } else {
+      // https://stackoverflow.com/questions/18449708/how-to-insert-null-in-mysql-especially-int-datatype
+      statement.setNull(index, Types.INTEGER);
+    }
+  }
+
   public static ArrayList<Transaction> retrieveTransactions(Integer accountId)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
     PreparedStatement statement = connection.prepareStatement(
-      "SELECT fromId, toId, amount, time, type FROM MasterTransfer WHERE fromId = ? OR toId = ?"
+      "SELECT fromAccountId, fromAccount.iban, fromBank.bic, toAccountId, toAccount.iban, " +
+      "toBank.bic, MasterTransfer.cardId, Card.cardNumber, amount, time, MasterTransfer.type FROM MasterTransfer " +
+      "LEFT JOIN Account AS fromAccount ON fromAccount.accountId = fromAccountId " +
+      "LEFT JOIN Account AS toAccount ON toAccount.accountId = toAccountId " +
+      "LEFT JOIN Users AS fromUser ON fromUser.userId = fromAccount.userId " +
+      "LEFT JOIN Users AS toUser ON toUser.userId = toAccount.userId " +
+      "LEFT JOIN Bank AS fromBank ON fromBank.bankId = fromUser.bankId " +
+      "LEFT JOIN Bank AS toBank ON toBank.bankId = toUser.bankId " +
+      "LEFT JOIN Card ON Card.cardId = MasterTransfer.cardId " +
+      "WHERE fromAccountId = ? OR toAccountId = ? ORDER BY MasterTransfer.time, transferId"
     );
     statement.setInt(1, accountId);
     statement.setInt(2, accountId);
@@ -63,21 +78,44 @@ public class TransactionDatabase {
     ArrayList<Transaction> transactions = new ArrayList<Transaction>();
     while (results.next() != false) {
       Transaction transaction = new Transaction();
-      transaction.fromId = results.getInt(1);
+      transaction.fromAccountId = getNullInt(results, 1);
+      transaction.fromAccountIban = getNullString(results, 2);
+      transaction.fromAccountBic = getNullString(results, 3);
+      transaction.toAccountId = getNullInt(results, 4);
+      transaction.toAccountIban = getNullString(results, 5);
+      transaction.toAccountBic = getNullString(results, 6);
+      transaction.cardId = getNullInt(results, 7);
+      transaction.cardNumber = getNullString(results, 8);
+      transaction.amount = getNullInt(results, 9);
+      transaction.time = results.getTimestamp(10);
 
-      // https://stackoverflow.com/questions/2920364/checking-for-a-null-int-value-from-a-java-resultset
-      if (results.wasNull()) {
-        transaction.fromId = null;
-      }
-      transaction.toId = results.getInt(2);
-      transaction.amount = results.getInt(3);
-      transaction.time = results.getTimestamp(4);
-      transaction.type = results.getString(5);
+      // https://www.baeldung.com/java-string-to-enum
+      transaction.type =
+        Transaction.TransactionType.valueOf(results.getString(11));
       transactions.add(transaction);
     }
     results.close();
     statement.close();
     connection.close();
     return transactions;
+  }
+
+  // https://stackoverflow.com/questions/2920364/checking-for-a-null-int-value-from-a-java-resultset
+  private static Integer getNullInt(ResultSet results, Integer index)
+    throws SQLException {
+    Integer value = results.getInt(index);
+    if (results.wasNull()) {
+      value = null;
+    }
+    return value;
+  }
+
+  private static String getNullString(ResultSet results, Integer index)
+    throws SQLException {
+    String value = results.getString(index);
+    if (results.wasNull()) {
+      value = null;
+    }
+    return value;
   }
 }

@@ -2,6 +2,8 @@ package com.server.routes;
 
 import com.server.containers.Account;
 import com.server.containers.Card;
+import com.server.containers.Transaction;
+import com.server.containers.Transaction.TransactionType;
 import com.server.controllers.CardController;
 import com.sun.net.httpserver.*;
 import java.io.IOException;
@@ -18,6 +20,12 @@ public class CardRouter extends Router {
         break;
       case "GET /cards/getCards":
         routeGetCards();
+        break;
+      case "POST /cards/withdraw":
+        routeUserMoney(TransactionType.Withdraw);
+        break;
+      case "POST /cards/payment":
+        routeUserMoney(TransactionType.Payment);
         break;
       default:
         sendResponse(400, BAD_PATH, Response.ResponseType.TEXT);
@@ -70,5 +78,32 @@ public class CardRouter extends Router {
     } else {
       sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
     }
+  }
+
+  private void routeUserMoney(TransactionType type) {
+    if (!authorization.getIsValid()) {
+      sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    Transaction transaction;
+    try {
+      transaction = (Transaction) decodeJson(Transaction.class);
+    } catch (Exception e) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    if (transaction.cardId == null || transaction.amount == null) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+    Response response;
+    if (type == TransactionType.Withdraw) {
+      response = CardController.controllerWithdraw(transaction, authorization);
+    } else {
+      response = CardController.controllerPayment(transaction, authorization);
+    }
+    sendResponse(response);
   }
 }

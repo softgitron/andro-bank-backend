@@ -15,7 +15,7 @@ public class TransactionController extends Controller {
     Account account,
     Token authorization
   ) {
-    if (!userOwnsAccount(account.accountId, authorization.userId)) {
+    if (userOwnsAccount(account.accountId, authorization.userId) == null) {
       return new Response(
         401,
         Router.AUTHENTICATION_ERROR,

@@ -32,7 +32,7 @@ def test_003():
 
 def test_004():
     print("Create two new accounts")
-    json_data = "{}"
+    json_data = '{"type":"Normal"}'
     return_value = '{"accountId":*,"iban":"*","balance":0}'
     r = c.new_request(
         "POST", "/accounts/createAccount", payload=json_data, authentication=True,
@@ -43,13 +43,15 @@ def test_004():
     r = c.new_request(
         "POST", "/accounts/createAccount", payload=json_data, authentication=True
     )
+    # Try to store second account iban
+    temporary_values["toIban"] = json.loads(r.text).get("iban")
     return expect(r, code=201, return_value=return_value, wildcard_maximum=24)
 
 
 def test_005():
     print("Get all account (there should be now two)")
     json_data = "{}"
-    return_value = '[{"accountId":*,"iban":"*","balance":0},{"accountId":*,"iban":"*","balance":0}]'
+    return_value = '[{"accountId":*,"iban":"*","balance":0,"type":"Normal"},{"accountId":*,"iban":"*","balance":0,"type":"Normal"}]'
     r = c.new_request(
         "GET", "/accounts/getAccounts", payload=json_data, authentication=True
     )
@@ -60,20 +62,22 @@ def test_005():
 
 def test_006():
     print("Create new card")
-    json_data = f'{{"accountId":{temporary_values["accountId"]},"spendingLimit": 6}}'
-    return_value = f'{{"cardId":*,"accountId":{temporary_values["accountId"]},"withdrawLimit":0,"spendingLimit":6,"area":""}}'
+    json_data = f'{{"accountId":{temporary_values["accountId"]},"spendingLimit": 0}}'
+    return_value = f'{{"cardId":*,"cardNumber":*,"accountId":{temporary_values["accountId"]},"withdrawLimit":0,"spendingLimit":0,"area":""}}'
     r = c.new_request(
         "POST", "/cards/createCard", payload=json_data, authentication=True
     )
-    return expect(r, code=201, return_value=return_value)
+    # Try to store cardId
+    temporary_values["cardId"] = json.loads(r.text).get("cardId")
+    return expect(r, code=201, return_value=return_value, wildcard_maximum=22)
 
 
 def test_007():
     print("Get all cards for specific account.")
     json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
-    return_value = '[{"cardId":*,"withdrawLimit":0,"spendingLimit":6,"area":""}]'
+    return_value = '[{"cardId":*,"cardNumber":*,"accountId":*,"withdrawLimit":0,"spendingLimit":0,"area":""}]'
     r = c.new_request("GET", "/cards/getCards", payload=json_data, authentication=True)
-    return expect(r, code=200, return_value=return_value)
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=22)
 
 
 def test_008():
@@ -98,9 +102,9 @@ def test_009():
 def test_010():
     print("Add more balance to account")
     json_data = f'{{"balance":50000,"accountId":{temporary_values["accountId"]}}}'
-    return_value = '{"accountId":*,"iban":"*","balance":50000}'
+    return_value = '{"accountId":*,"iban":"*","balance":50000,"type":"Normal"}'
     r = c.new_request(
-        "POST", "/accounts/addBalance", payload=json_data, authentication=True
+        "POST", "/accounts/deposit", payload=json_data, authentication=True
     )
     return expect(r, code=200, return_value=return_value, wildcard_maximum=24)
 
@@ -108,8 +112,68 @@ def test_010():
 def test_011():
     print("Get all transactions (1)")
     json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
-    return_value = '[{"toId":*,"amount":50000,"time":"*","type":"DepWit"}]'
+    return_value = '[{"toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH","amount":50000,"time":"*","type":"Deposit"}]'
     r = c.new_request(
         "GET", "/transactions/getTransactions", payload=json_data, authentication=True
     )
     return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
+
+
+def test_012():
+    print("Withdraw money from account")
+    json_data = f'{{"cardId":{temporary_values["cardId"]},"amount":10000}}'
+    return_value = '{"accountId":*,"iban":"*","balance":40000,"type":"Normal"}'
+    r = c.new_request("POST", "/cards/withdraw", payload=json_data, authentication=True)
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
+
+
+def test_013():
+    print("Pay with a card")
+    json_data = f'{{"cardId":{temporary_values["cardId"]},"amount":10000}}'
+    return_value = '{"accountId":*,"iban":"*","balance":30000,"type":"Normal"}'
+    r = c.new_request("POST", "/cards/payment", payload=json_data, authentication=True)
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
+
+
+def test_014():
+    print("Check once more that everything is registering to transactions.")
+    json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
+    return_value = """[{"toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH","amount":50000,"time":"*","type":"Deposit"},\
+{"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":"*","type":"Withdraw"},\
+{"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":"*","type":"Payment"}]"""
+    r = c.new_request(
+        "GET", "/transactions/getTransactions", payload=json_data, authentication=True
+    )
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
+
+
+def test_015():
+    print("Make transfer between accounts")
+    json_data = f'{{"fromAccountId":{temporary_values["accountId"]},"toAccountIban":"{temporary_values["toIban"]}","amount":10000}}'
+    return_value = '{"accountId":*,"iban":"*","balance":20000,"type":"Normal"}'
+    r = c.new_request(
+        "POST", "/accounts/transfer", payload=json_data, authentication=True
+    )
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
+
+
+def test_016():
+    print("Change type of the account")
+    json_data = f'{{"accountId":{temporary_values["accountId"]},"type":"Credit"}}'
+    return_value = '{"accountId":*,"iban":"*","balance":20000,"type":"Credit"}'
+    r = c.new_request(
+        "PATCH", "/accounts/updateType", payload=json_data, authentication=True
+    )
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=24)
+
+
+def test_017():
+    print("Update account with card to savings type")
+    json_data = f'{{"accountId":{temporary_values["accountId"]},"type":"Savings"}}'
+    return_value = (
+        "There is cards attached to the account. Can't update to savings type."
+    )
+    r = c.new_request(
+        "PATCH", "/accounts/updateType", payload=json_data, authentication=True
+    )
+    return expect(r, code=400, return_value=return_value, wildcard_maximum=24)
