@@ -2,6 +2,7 @@ package com.server.routes;
 
 public class Response {
 
+  // Class for keeping response that can be send to client
   public enum ResponseType {
     TEXT,
     JSON

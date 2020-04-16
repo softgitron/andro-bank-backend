@@ -18,8 +18,9 @@ def test_001():
 def test_002():
     print("Create new user with details.")
     json_data = '{"bankId":0,"email":"henry.master@gmail.com","password":"Hello","phoneNumber":"2451156481","username":"Henry","firstName":"Henry","lastName":"Larson"}'
+    return_value = '{"username":"Henry","firstName":"Henry","lastName":"Larson","email":"henry.master@gmail.com","phoneNumber":"2451156481","bankId":0}'
     r = c.new_request("POST", "/users/createUser", payload=json_data)
-    return expect(r, code=201, return_value="OK", authentication_header=True)
+    return expect(r, code=201, return_value=return_value, authentication_header=True)
 
 
 def test_003():
@@ -177,3 +178,53 @@ def test_017():
         "PATCH", "/accounts/updateType", payload=json_data, authentication=True
     )
     return expect(r, code=400, return_value=return_value, wildcard_maximum=24)
+
+
+def test_018():
+    print("Update card details")
+    json_data = f'{{"cardId":{temporary_values["cardId"]},"withdrawLimit":5412,"spendingLimit":5879,"area":""}}'
+    return_value = '{"cardId":*,"cardNumber":*,"accountId":*,"withdrawLimit":5412,"spendingLimit":5879,"area":""}'
+    r = c.new_request(
+        "PATCH", "/cards/updateCard", payload=json_data, authentication=True
+    )
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=24)
+
+
+def test_019():
+    print("Make periodic future transaction")
+    json_data = f'{{"fromAccountId":{temporary_values["accountId"]},"toAccountIban":"{temporary_values["toIban"]}","amount":10000,"atInterval":1,"times":2,"atTime":"Apr 16, 2020, 2:20:28 PM"}}'
+    return_value = "OK"
+    r = c.new_request(
+        "POST", "/accounts/futureTransfer", payload=json_data, authentication=True
+    )
+    return expect(r, code=201, return_value=return_value, wildcard_maximum=30)
+
+
+def test_020():
+    print("Get all periodic future transactions")
+    json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
+    return_value = """[{"futureTransferId":*,"atInterval":1,"times":2,"atTime":"*","fromAccountId":*,\
+"fromAccountIban":"*","fromAccountBic":"DEALFIHH","toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH",\
+"amount":10000}]"""
+    r = c.new_request(
+        "GET",
+        "/transactions/getFutureTransactions",
+        payload=json_data,
+        authentication=True,
+    )
+    # Try to retrieve future transfer id
+    temporary_values["futureTransferId"] = json.loads(r.text)[0].get("futureTransferId")
+    return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
+
+
+def test_021():
+    print("Delete future transaction")
+    json_data = f'{{"fromAccountId":{temporary_values["accountId"]},"futureTransferId":{temporary_values["futureTransferId"]}}}'
+    return_value = "OK"
+    r = c.new_request(
+        "DELETE",
+        "/transactions/deleteFutureTransaction",
+        payload=json_data,
+        authentication=True,
+    )
+    return expect(r, code=200, return_value=return_value)

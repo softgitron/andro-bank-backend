@@ -25,6 +25,8 @@ public class Authentication {
 
   private static final String JWT_KEY_FILE = "./JWT_key.key";
 
+  // Prepares authentication by loading secret key from the file
+  // or by generating one
   public static void initialize() {
     try {
       File rsaFile = new File(JWT_KEY_FILE);
@@ -44,6 +46,7 @@ public class Authentication {
     rsaKey.setKeyId("andro-bank-key");
   }
 
+  // Generates new keys for JWT (javascript web token) encryption
   private static RsaJsonWebKey generateNewKey() {
     RsaJsonWebKey rsaJsonWebKey = null;
     try {
@@ -62,6 +65,7 @@ public class Authentication {
     return rsaJsonWebKey;
   }
 
+  // prepares new json web signature model
   private static JsonWebSignature newTokenHandler() {
     JsonWebSignature tokenHandler;
     tokenHandler = new JsonWebSignature();
@@ -71,6 +75,7 @@ public class Authentication {
     return tokenHandler;
   }
 
+  // Create new claims for the JWT
   private static JwtClaims createClaims(Token token) {
     Gson gson = new Gson();
     String payload = gson.toJson(token, Token.class);
@@ -86,6 +91,7 @@ public class Authentication {
     return claims;
   }
 
+  // Generates JWT
   public static String createJWT(Integer userId) {
     JsonWebSignature tokenGenerator = newTokenHandler();
     Token token = new Token(userId);
@@ -101,6 +107,7 @@ public class Authentication {
     return jwt;
   }
 
+  // Prepares consumption of the JWT
   private static JwtConsumer getConsumer() {
     JwtConsumer consumer = new JwtConsumerBuilder()
       .setRequireExpirationTime() // the JWT must have an expiration time
@@ -117,6 +124,7 @@ public class Authentication {
     return consumer;
   }
 
+  // Validate JWT and returns new details of it
   public static Token validateJWT(String rawToken) {
     try {
       JwtConsumer consumer = getConsumer();

@@ -18,6 +18,8 @@ public class UserController extends Controller {
   private static final String loginError =
     "User does not exist or password is wrong.";
 
+  // Creates new user based on the parameters
+  // Returns details of the new user and authentication token
   public static Response controllerCreateUser(User user) {
     // https://www.baeldung.com/java-password-hashing
     // Hashing password
@@ -42,9 +44,12 @@ public class UserController extends Controller {
     } catch (SQLException e) {
       return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
     }
-    return new Response(201, "OK", Response.ResponseType.TEXT, token);
+    user.password = null;
+    return new Response(201, user, Response.ResponseType.JSON, token);
   }
 
+  // Updates details of the user
+  // Returns details of the updated user
   public static Response controllerUpdateUserDetails(
     User newUserDetails,
     Token authorization
@@ -57,6 +62,7 @@ public class UserController extends Controller {
       return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
     }
 
+    // Combine new and old information
     User preparedDetails = new User();
     preparedDetails.bankId = oldUserDetails.bankId;
     preparedDetails.username =
@@ -109,6 +115,8 @@ public class UserController extends Controller {
     return new Response(200, preparedDetails, Response.ResponseType.JSON);
   }
 
+  // Checks email and password for login
+  // Returns new authentication token
   public static Response controllerLogin(String email, String password) {
     try {
       User user = UserDatabase.retrieveUser(email);
@@ -131,6 +139,8 @@ public class UserController extends Controller {
     }
   }
 
+  // Hashes password with PBKDF2 and salts it
+  // Returns hashed password
   private static byte[] hashPassword(String password, byte[] salt) {
     KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
     byte[] hash = null;

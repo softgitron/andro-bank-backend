@@ -16,13 +16,11 @@ import java.util.Random;
 
 public class CardController extends Controller {
 
+  // Creates new card and attaches it to the account
+  // Returns details of the new card
   public static Response controllerCreateCard(Card newCard) {
     // If no limits are given set default
-    newCard.spendingLimit =
-      (newCard.spendingLimit != null) ? newCard.spendingLimit : 0;
-    newCard.withdrawLimit =
-      (newCard.withdrawLimit != null) ? newCard.withdrawLimit : 0;
-    newCard.area = (newCard.area != null) ? newCard.area : "";
+    newCard = sanitizeParameters(newCard);
 
     // Let's generate new card number
     Random r = new Random();
@@ -51,6 +49,8 @@ public class CardController extends Controller {
     }
   }
 
+  // Retrieves all cards from specific account
+  // Returns list of cards
   public static Response controllerGetCards(
     Account account,
     Token authorization
@@ -73,6 +73,8 @@ public class CardController extends Controller {
     }
   }
 
+  // Withdraws specific amount form the account using one card
+  // Returns updated account
   public static Response controllerWithdraw(
     Transaction transaction,
     Token authorization
@@ -109,6 +111,8 @@ public class CardController extends Controller {
     );
   }
 
+  // Makes new payment using card
+  // Returns status of the updated account
   public static Response controllerPayment(
     Transaction transaction,
     Token authorization
@@ -145,6 +149,8 @@ public class CardController extends Controller {
     );
   }
 
+  // Executes the actual operation of the payment or withdraw
+  // Returns details of the altered account
   private static Response executeWithdraw(
     Transaction transaction,
     Token authorization,
@@ -172,11 +178,7 @@ public class CardController extends Controller {
     account.balance = account.balance - transaction.amount;
     try {
       // Execute withdrawal
-      AccountDatabase.updateBalance(
-        account.accountId,
-        account.balance,
-        authorization.userId
-      );
+      AccountDatabase.updateBalance(account.accountId, account.balance);
 
       // Write details of the withdrawal to transactions.
       TransactionDatabase.insertTransaction(
@@ -190,5 +192,50 @@ public class CardController extends Controller {
       return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
     }
     return new Response(200, account, Response.ResponseType.JSON);
+  }
+
+  // Updates details of the cards for example limits based on parameters
+  // Returns details of the altered card
+  public static Response controllerUpdateCard(
+    Card newCard,
+    Token authorization
+  ) {
+    // If no limits are given set default
+    newCard = sanitizeParameters(newCard);
+    try {
+      Card currentCard = userOwnsCard(newCard.cardId, authorization.userId);
+      if (currentCard == null) {
+        return new Response(
+          401,
+          Router.AUTHENTICATION_ERROR,
+          Response.ResponseType.TEXT
+        );
+      }
+
+      CardDatabase.updateCard(
+        newCard.cardId,
+        newCard.withdrawLimit,
+        newCard.spendingLimit,
+        newCard.area
+      );
+      currentCard.withdrawLimit = newCard.withdrawLimit;
+      currentCard.spendingLimit = newCard.spendingLimit;
+      currentCard.area = newCard.area;
+      return new Response(200, currentCard, Response.ResponseType.JSON);
+    } catch (SQLException e) {
+      return new Response(500, SQL_ERROR, Response.ResponseType.TEXT);
+    }
+  }
+
+  // This gunction sets default valuest to card object if some values are missing
+  // Returns sanitized version of the card object.
+  private static Card sanitizeParameters(Card newCard) {
+    // If no limits are given set default
+    newCard.spendingLimit =
+      (newCard.spendingLimit != null) ? newCard.spendingLimit : 0;
+    newCard.withdrawLimit =
+      (newCard.withdrawLimit != null) ? newCard.withdrawLimit : 0;
+    newCard.area = (newCard.area != null) ? newCard.area : "";
+    return newCard;
   }
 }

@@ -22,10 +22,13 @@ public class CardRouter extends Router {
         routeGetCards();
         break;
       case "POST /cards/withdraw":
-        routeUserMoney(TransactionType.Withdraw);
+        routeUseMoney(TransactionType.Withdraw);
         break;
       case "POST /cards/payment":
-        routeUserMoney(TransactionType.Payment);
+        routeUseMoney(TransactionType.Payment);
+        break;
+      case "PATCH /cards/updateCard":
+        routeUpdateCard();
         break;
       default:
         sendResponse(400, BAD_PATH, Response.ResponseType.TEXT);
@@ -33,6 +36,24 @@ public class CardRouter extends Router {
     }
   }
 
+  /**
+   * @api {post} /cards/createCards Create new card for the account
+   * @apiVersion 1.0.0
+   * @apiName createCards
+   * @apiGroup Card
+   *
+   * @apiHeader {String} x-access-token authentication token of the session.
+   *
+   * @apiParam {Number{0..}} accountId Id of the account where card is attached to
+   * @apiParam {Number{0..}} [withdrawLimit=0] Limit of the withdrawals (0 means no limit)
+   * @apiParam {Number{0..}} [paymnetLimit=0] Limit of the payments (0 means no limit)
+   * @apiParam {String} [area=""] Area where payments can be only processed ("" means no limit)
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 201 OK
+   * {"cardId":1,"cardNumber":"1025 5879 5483 2858","accountId":1,"withdrawLimit":0,"spendingLimit":0,"area":""}
+   *
+   */
   private void routeCreateCard() {
     if (!authorization.getIsValid()) {
       sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
@@ -47,7 +68,10 @@ public class CardRouter extends Router {
       return;
     }
 
-    if (newCard.area == null || newCard.area.matches(AREA_REGEX)) {
+    if (
+      newCard.accountId != null &&
+      (newCard.area == null || newCard.area.matches(AREA_REGEX))
+    ) {
       Response response = CardController.controllerCreateCard(newCard);
       sendResponse(response);
     } else {
@@ -55,6 +79,21 @@ public class CardRouter extends Router {
     }
   }
 
+  /**
+   * @api {get} /cards/getCards Get cards that are attached to account
+   * @apiVersion 1.0.0
+   * @apiName getCards
+   * @apiGroup Card
+   *
+   * @apiHeader {String} x-access-token authentication token of the session.
+   *
+   * @apiParam {Number{0..}} accountId Id of the account where cards are attached to.
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 200 OK
+   * [{"cardId":1,"cardNumber":"1025 5879 5483 2858","accountId":1,"withdrawLimit":0,"spendingLimit":0,"area":""}]
+   *
+   */
   private void routeGetCards() {
     if (!authorization.getIsValid()) {
       sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
@@ -80,7 +119,39 @@ public class CardRouter extends Router {
     }
   }
 
-  private void routeUserMoney(TransactionType type) {
+  /**
+   * @api {post} /cards/withdraw Make withdraw using card
+   * @apiVersion 1.0.0
+   * @apiName withdraw
+   * @apiGroup Card
+   *
+   * @apiHeader {String} x-access-token authentication token of the session.
+   *
+   * @apiParam {Number{0..}} cardId Id of the card that is used.
+   * @apiParam {Number{0..}} amount Amount that is withdrawn from the account.
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 200 OK
+   * {"accountId":1,"iban":"FI02 4597 4268 1567 54","balance":100,"type":"Credit"}
+   *
+   */
+  /**
+   * @api {post} /cards/payment Make payment using card
+   * @apiVersion 1.0.0
+   * @apiName payment
+   * @apiGroup Card
+   *
+   * @apiHeader {String} x-access-token authentication token of the session.
+   *
+   * @apiParam {Number{0..}} cardId Id of the card that is used.
+   * @apiParam {Number{0..}} amount Amount that is payed from the account.
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 200 OK
+   * {"accountId":1,"iban":"FI02 4597 4268 1567 54","balance":100,"type":"Credit"}
+   *
+   */
+  private void routeUseMoney(TransactionType type) {
     if (!authorization.getIsValid()) {
       sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
       return;
@@ -104,6 +175,49 @@ public class CardRouter extends Router {
     } else {
       response = CardController.controllerPayment(transaction, authorization);
     }
+    sendResponse(response);
+  }
+
+  /**
+   * @api {post} /cards/updateCard Update details of the card
+   * @apiVersion 1.0.0
+   * @apiName updateCard
+   * @apiGroup Card
+   *
+   * @apiHeader {String} x-access-token authentication token of the session.
+   *
+   * @apiParam {Number{0..}} cardId Id of the card that is being updated
+   * @apiParam {Number{0..}} [withdrawLimit=0] Limit of the withdrawals (0 means no limit)
+   * @apiParam {Number{0..}} [paymnetLimit=0] Limit of the payments (0 means no limit)
+   * @apiParam {String} [area=""] Area where payments can be only processed ("" means no limit)
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 200 OK
+   * {"cardId":1,"cardNumber":"1025 5879 5483 2858","accountId":1,"withdrawLimit":0,"spendingLimit":0,"area":""}
+   *
+   */
+  private void routeUpdateCard() {
+    if (!authorization.getIsValid()) {
+      sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    Card card;
+    try {
+      card = (Card) decodeJson(Card.class);
+    } catch (Exception e) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+
+    if (card.cardId == null) {
+      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
+      return;
+    }
+    Response response = CardController.controllerUpdateCard(
+      card,
+      authorization
+    );
     sendResponse(response);
   }
 }

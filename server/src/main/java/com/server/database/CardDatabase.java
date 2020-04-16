@@ -41,7 +41,8 @@ public class CardDatabase {
     return cardId;
   }
 
-  // Retrieve all cards for specific user account
+  // Retrieve all cards for specific user account by account id
+  // Returns lis of cards
   public static ArrayList<Card> retrieveCardsByAccountId(Integer accountId)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
@@ -55,6 +56,8 @@ public class CardDatabase {
     return cards;
   }
 
+  // Retrieve all cards for specific user account by card id
+  // Returns lis of cards (should return only one)
   public static ArrayList<Card> retrieveCardsByCardId(Integer cardId)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
@@ -68,7 +71,10 @@ public class CardDatabase {
     return cards;
   }
 
-  public static ArrayList<Card> getCards(PreparedStatement statement)
+  // Actual retrieval of the cards based on the prepared statements
+  // described above
+  // Returns list of cards
+  private static ArrayList<Card> getCards(PreparedStatement statement)
     throws SQLException {
     ResultSet results = statement.executeQuery();
     ArrayList<Card> cards = new ArrayList<Card>();
@@ -85,5 +91,29 @@ public class CardDatabase {
     results.close();
     statement.close();
     return cards;
+  }
+
+  // Update details of the cards like limits
+  // Returns nothing
+  public static void updateCard(
+    Integer cardId,
+    Integer withdrawLimit,
+    Integer spendingLimit,
+    String area
+  )
+    throws SQLException {
+    Connection connection = DatabaseConnection.getConnection();
+
+    PreparedStatement statement = connection.prepareStatement(
+      "UPDATE Card SET withdrawLimit = ?, spendingLimit = ?, area = ? WHERE cardId = ?"
+    );
+    statement.setInt(1, withdrawLimit);
+    statement.setInt(2, spendingLimit);
+    statement.setString(3, area);
+    statement.setInt(4, cardId);
+    statement.executeUpdate();
+
+    statement.close();
+    connection.close();
   }
 }

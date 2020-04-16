@@ -23,6 +23,9 @@ public class DatabaseConnection {
 
   private static BasicDataSource dataSource;
 
+  // Initializes communication with the database based on the default values
+  // or values set using environment variables
+  // Returns nothing
   public static void initialize() {
     // https://www.technicalkeeda.com/java-tutorials/read-environment-variables-in-java
     // https://stackoverflow.com/questions/29537639/check-if-returned-value-is-not-null-and-if-so-assign-it-in-one-line-with-one-m
@@ -65,6 +68,8 @@ public class DatabaseConnection {
     dataSource.setMaxOpenPreparedStatements(20);
   }
 
+  // Provides connections for another database classes from connection pool
+  // Returns new connection to the database
   public static Connection getConnection() {
     for (int i = 10; i > 0; i--) {
       try {

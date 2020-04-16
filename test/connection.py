@@ -28,3 +28,11 @@ class Connection:
                 return requests.patch(url=full_path, headers=self.headers, data=payload)
             else:
                 return requests.patch(url=full_path, data=payload)
+
+        elif request_type == "DELETE":
+            if authentication:
+                return requests.delete(
+                    url=full_path, headers=self.headers, data=payload
+                )
+            else:
+                return requests.delete(url=full_path, data=payload)

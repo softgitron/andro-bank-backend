@@ -41,6 +41,7 @@ public class AccountDatabase {
   }
 
   // Retrieve all banks from database
+  // Returns list of banks
   public static ArrayList<Bank> retrieveBanks() throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
@@ -62,7 +63,8 @@ public class AccountDatabase {
     return banks;
   }
 
-  // Retrieve all accounts for specific user
+  // Retrieve all accounts with userId from database
+  // Returns list of accounts
   public static ArrayList<Account> retrieveAccounts(Integer userId)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
@@ -75,6 +77,8 @@ public class AccountDatabase {
     return results;
   }
 
+  // Retrieve all accounts with userId and accountId from database
+  // Returns list of accounts (normaly only one account)
   public static ArrayList<Account> retrieveAccounts(
     Integer userId,
     Integer accountId
@@ -91,6 +95,8 @@ public class AccountDatabase {
     return results;
   }
 
+  // Retrieve all accounts with iban from database
+  // Returns list of accounts (normaly only one account)
   public static ArrayList<Account> retrieveAccounts(String accountIban)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
@@ -103,6 +109,9 @@ public class AccountDatabase {
     return results;
   }
 
+  // Do the actual retriaval of the accounts from the database using
+  // prepared statements described above
+  // Returns list of accounts
   private static ArrayList<Account> getAccounts(PreparedStatement statement)
     throws SQLException {
     ResultSet results = statement.executeQuery();
@@ -120,26 +129,25 @@ public class AccountDatabase {
     return accounts;
   }
 
-  public static void updateBalance(
-    Integer accountId,
-    Integer balance,
-    Integer userId
-  )
+  // Update account balance to the database based on accountId
+  // Returns nothing
+  public static void updateBalance(Integer accountId, Integer balance)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
     PreparedStatement statement = connection.prepareStatement(
-      "UPDATE Account SET balance = ? WHERE accountId = ? AND userId = ?"
+      "UPDATE Account SET balance = ? WHERE accountId = ?"
     );
     statement.setInt(1, balance);
     statement.setInt(2, accountId);
-    statement.setInt(3, userId);
     statement.executeUpdate();
 
     statement.close();
     connection.close();
   }
 
+  // Updates type of the account based on the parameters
+  // Returns nothing
   public static void updateType(Integer accountId, Account.AccountType type)
     throws SQLException {
     Connection connection = DatabaseConnection.getConnection();

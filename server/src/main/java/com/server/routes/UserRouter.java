@@ -32,6 +32,27 @@ public class UserRouter extends Router {
     }
   }
 
+  /**
+   * @api {post} /users/createUser Create new user to specific bank
+   * @apiVersion 1.0.0
+   * @apiName createUser
+   * @apiGroup User
+   *
+   * @apiHeader {String} x-access-token authentication token of the session.
+   *
+   * @apiParam {Integer{0..}} bankId Id of the bank where account is created
+   * @apiParam {String{3..}} username Username of the new user
+   * @apiParam {String{3..}} firstName First name of the new user
+   * @apiParam {String{3..}} lastName Last name of the new user
+   * @apiParam {String{6..}} email Email of the new user
+   * @apiParam {String{6..}} phoneNumber Phonenumber of the new user
+   * @apiParam {String{12..}} password Password of the new user
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 201 OK
+   * {"username":"Henry","firstName":"Henry","lastName":"Harson","email":"super@gmail.com","phoneNumber":"2452256481"}
+   *
+   */
   private void routeCreateUser() {
     User newUser;
     try {
@@ -44,6 +65,7 @@ public class UserRouter extends Router {
     // Validate provided information with regexes
     // Might not be definitive solution but better than nothing.
     if (
+      newUser.bankId != null &&
       newUser.username != null &&
       newUser.firstName != null &&
       newUser.lastName != null &&
@@ -65,6 +87,24 @@ public class UserRouter extends Router {
     }
   }
 
+  /**
+   * @api {post} /users/updateUserDetails Update details of the user
+   * @apiVersion 1.0.0
+   * @apiName updateUserDetails
+   * @apiGroup User
+   *
+   * @apiParam {String{3..}} [username] Username of the new user
+   * @apiParam {String{3..}} [firstName] First name of the new user
+   * @apiParam {String{3..}} [lastName] Last name of the new user
+   * @apiParam {String{6..}} [email] Email of the new user
+   * @apiParam {String{6..}} [phoneNumber] Phonenumber of the new user
+   * @apiParam {String{12..}} [password] Password of the new user
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 201 OK
+   * {"username":"Henry","firstName":"Henry","lastName":"Harson","email":"super@gmail.com","phoneNumber":"2452256481"}
+   *
+   */
   private void routeUpdateUserDetails() {
     if (!authorization.getIsValid()) {
       sendResponse(401, AUTHENTICATION_ERROR, Response.ResponseType.TEXT);
@@ -102,6 +142,24 @@ public class UserRouter extends Router {
     }
   }
 
+  /**
+   * @api {post} /users/login Login
+   * @apiVersion 1.0.0
+   * @apiName login
+   * @apiGroup User
+   *
+   * @apiParam {String{3..}} email Username of the new user
+   * @apiParam {String{12..}} [password] Password of the new user
+   *
+   * @apiHeaderExample Success-Response:
+   * HTTP/1.1 200 OK
+   * {x-access-token: "eyhniuhnhuiohaw==hjhuihuehiuguj=="}
+   *
+   * @apiSuccessExample Success-Response:
+   *     HTTP/1.1 201 OK
+   * {"username":"Henry","firstName":"Henry","lastName":"Harson","email":"super@gmail.com","phoneNumber":"2452256481"}
+   *
+   */
   private void routeLogin() {
     User user;
     try {
@@ -114,7 +172,10 @@ public class UserRouter extends Router {
     // Validate provided information with regexes
     // Might not be definitive solution but better than nothing.
     if (
-      user.email.matches(EMAIL_REGEX) && user.password.matches(PASSWORD_REGEX)
+      user.email != null &&
+      user.email.matches(EMAIL_REGEX) &&
+      user.password != null &&
+      user.password.matches(PASSWORD_REGEX)
     ) {
       // Go to controller and handle request
       Response response = UserController.controllerLogin(

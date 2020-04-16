@@ -26,6 +26,7 @@ public abstract class Router implements HttpHandler {
   protected String methodAddress;
 
   // Must be alway called from inherited classes
+  // Does basic preparations for routing like authentication
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
     this.httpExchange = httpExchange;
@@ -41,6 +42,8 @@ public abstract class Router implements HttpHandler {
     }
   }
 
+  // Decodes json based on the class type
+  // Returns Decoded object
   protected Object decodeJson(Class toClass) throws Exception {
     InputStream inputStream = httpExchange.getRequestBody();
     StringBuilder jsonBuilder = new StringBuilder();
@@ -71,10 +74,12 @@ public abstract class Router implements HttpHandler {
     return results;
   }
 
+  // Sends response that is wrapped inside respose object
   protected void sendResponse(Response response) {
     executeResponse(response);
   }
 
+  // Sends response that is manually made
   protected void sendResponse(
     Integer responseCode,
     String responseData,
@@ -83,6 +88,7 @@ public abstract class Router implements HttpHandler {
     executeResponse(new Response(responseCode, responseData, responseType));
   }
 
+  // Sends response back to client
   private void executeResponse(Response response) {
     // Check data type
     String responseData;

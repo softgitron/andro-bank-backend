@@ -10,6 +10,8 @@ import java.sql.Statement;
 public class UserDatabase {
 
   // https://stackoverflow.com/questions/1812891/java-escape-string-to-prevent-sql-injection
+  // Inser new user to the database
+  // Returns new user id
   public static Integer insertUser(
     Integer bankId,
     String username,
@@ -49,6 +51,8 @@ public class UserDatabase {
     return userId;
   }
 
+  // Update user details based on the parameters
+  // Returns nothing
   public static void updateUser(
     String username,
     String firstName,
@@ -76,6 +80,8 @@ public class UserDatabase {
     return;
   }
 
+  // Retrieve information of the user based on the userId
+  // Returns user details
   public static User retrieveUser(Integer userId) throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
@@ -91,6 +97,8 @@ public class UserDatabase {
     return results;
   }
 
+  // Retrieve user details based on the email
+  // Returns new user details
   public static User retrieveUser(String email) throws SQLException {
     Connection connection = DatabaseConnection.getConnection();
 
@@ -106,6 +114,8 @@ public class UserDatabase {
     return results;
   }
 
+  // Helper function for pasring user details
+  // Returns user details
   private static User extractUserInformation(PreparedStatement statement)
     throws SQLException {
     ResultSet results = statement.executeQuery();

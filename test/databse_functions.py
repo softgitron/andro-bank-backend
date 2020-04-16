@@ -23,6 +23,7 @@ def empty(mydb):
 
     mycursor.execute("USE olio1;", None)
     # Delete all
+    mycursor.execute("DELETE FROM FutureTransfer;", None)
     mycursor.execute("DELETE FROM MasterTransfer;", None)
     mycursor.execute("DELETE FROM Card;", None)
     mycursor.execute("DELETE FROM Account;", None)

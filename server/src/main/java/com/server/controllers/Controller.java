@@ -2,8 +2,10 @@ package com.server.controllers;
 
 import com.server.containers.Account;
 import com.server.containers.Account.AccountType;
+import com.server.containers.Card;
 import com.server.containers.Transaction;
 import com.server.database.AccountDatabase;
+import com.server.database.CardDatabase;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 
@@ -13,6 +15,8 @@ public class Controller {
   protected static final Integer MAX_CREADIT = -100000;
   protected static final SecureRandom random = new SecureRandom();
 
+  // Checks wheather user owns the account
+  // Return account if user owns it
   protected static Account userOwnsAccount(Integer accountId, Integer userId) {
     ArrayList<Account> accounts;
     try {
@@ -29,6 +33,29 @@ public class Controller {
     return null;
   }
 
+  // Checks that user owns card
+  // Returns card if user owns it
+  protected static Card userOwnsCard(Integer cardId, Integer userId) {
+    ArrayList<Card> cards;
+    try {
+      cards = CardDatabase.retrieveCardsByCardId(cardId);
+    } catch (Exception e) {
+      return null;
+    }
+
+    // If no cards return null
+    if (cards.size() != 1) {
+      return null;
+    }
+    Card card = cards.get(0);
+
+    // Check that accountId on the card matches accountid that user owns
+    if (userOwnsAccount(card.accountId, userId) == null) {
+      return null;
+    }
+    return card;
+  }
+
   // Remember to check that user own account before executing this.
   protected static Boolean withdrawCanBeMade(
     Account account,
@@ -38,6 +65,8 @@ public class Controller {
     return doWithdrawCheck(account, null, null, amount, type);
   }
 
+  // Checks wheather withdraw can be made based on the balance
+  // Returns true if the balance is sufficient
   protected static Boolean withdrawCanBeMade(
     Account fromAccount,
     Integer toAccountId,
@@ -48,6 +77,8 @@ public class Controller {
     return doWithdrawCheck(fromAccount, toAccountId, userId, amount, type);
   }
 
+  // Checks wheather withdraw from the account can be made to specific account
+  // Returns true if the balance is sufficient
   private static Boolean doWithdrawCheck(
     Account fromAccount,
     Integer toAccountId,
@@ -87,6 +118,8 @@ public class Controller {
     return true;
   }
 
+  // Check wheather user owns destination of the account
+  // Returns true if this is a case
   private static Boolean userOwnsDestination(
     Account fromAccount,
     Integer toAccountId,
