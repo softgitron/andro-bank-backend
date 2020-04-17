@@ -12,6 +12,8 @@ public class DatabaseConnection {
     "jdbc:mysql://localhost:3306/olio1";
   private static final String DEFAULT_DATABASE_USERNAME = "olio1admin";
   private static final String DEFAULT_DATABASE_PASSWORD = "YOUR PASSWORD HERE";
+  private static final Integer DEFAULT_RETRY_TIME = 15;
+  private static final Integer DEFAULT_RETRY_COUNT = 10;
 
   private DatabaseConnection instance = new DatabaseConnection();
 
@@ -66,23 +68,26 @@ public class DatabaseConnection {
     dataSource.setMinIdle(2);
     dataSource.setMinIdle(5);
     dataSource.setMaxOpenPreparedStatements(20);
+
+    System.out.println("Database connection will be made to " + databaseUrl);
   }
 
   // Provides connections for another database classes from connection pool
   // Returns new connection to the database
   public static Connection getConnection() {
-    for (int i = 10; i > 0; i--) {
+    for (int i = DEFAULT_RETRY_COUNT; i > 0; i--) {
       try {
         return dataSource.getConnection();
       } catch (SQLException e) {
         try {
           System.out.println(
             String.format(
-              "Problems with a database connection.\nTrying again in 1 second.\n%d trials left.",
+              "Problems with a database connection.\nTrying again in %d seconds.\n%d trials left.",
+              DEFAULT_RETRY_TIME,
               i
             )
           );
-          Thread.sleep(1000);
+          Thread.sleep(DEFAULT_RETRY_TIME * 1000);
         } catch (InterruptedException e1) {
           System.exit(3);
         }

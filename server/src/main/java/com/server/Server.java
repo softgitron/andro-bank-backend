@@ -70,18 +70,22 @@ class Server {
   // Loads main environment variables related to basic server funktions
   private static void loadParameters() {
     HOST = (HOST = System.getenv("HOST")) != null ? HOST : DEFAULT_HOST;
-    PORT =
-      (PORT = Integer.getInteger(System.getenv("PORT"))) != null
-        ? PORT
-        : DEFAULT_PORT;
+    PORT = (PORT = getInt(System.getenv("PORT"))) != null ? PORT : DEFAULT_PORT;
     BACK_LOGGING =
-      (BACK_LOGGING = Integer.getInteger(System.getenv("BACK_LOGGING"))) != null
+      (BACK_LOGGING = getInt(System.getenv("BACK_LOGGING"))) != null
         ? BACK_LOGGING
         : DEFAULT_BACK_LOGGING;
     THREAD_AMOUNT =
-      (THREAD_AMOUNT = Integer.getInteger(System.getenv("THREAD_AMOUNT"))) !=
-        null
+      (THREAD_AMOUNT = getInt(System.getenv("THREAD_AMOUNT"))) != null
         ? THREAD_AMOUNT
         : DEFAULT_THREAD_AMOUNT;
+  }
+
+  private static Integer getInt(String string) {
+    if (string == null) {
+      return null;
+    } else {
+      return Integer.parseInt(string);
+    }
   }
 }

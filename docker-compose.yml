@@ -5,6 +5,8 @@ services:
     image: mysql
     build: ./sql
     restart: always
+    ports:
+      - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
       MYSQL_DATABASE: olio1
@@ -15,8 +17,6 @@ services:
       - db_password
     volumes:
       - db_data:/var/lib/mysql
-    expose:
-      - "3306"
     security_opt:
       - seccomp:unconfined
 
@@ -27,14 +27,16 @@ services:
       - db
     links:
       - db
+    expose:
+      - 8080
     ports:
       - 8080:8080
     environment:
-      DEFAULT_DATABASE_URL: jdbc:mysql://localhost:3306/olio1
+      DATABASE_URL: jdbc:mysql://db:3306/olio1
       MYSQL_USER: olio1admin
       MYSQL_PASSWORD: /run/secrets/db_password
-      BACKEND_ADDRESS: 0.0.0.0
-      BACKEND_PORT: 8080
+      HOST: 0.0.0.0
+      PORT: 8080
     secrets:
       - db_password
 
