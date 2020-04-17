@@ -5,6 +5,3 @@ JWT_key.key
 
 # No python caches
 /test/__pycache__/
-
-# No generated apiDoc documentation
-/apidoc
