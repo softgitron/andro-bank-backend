@@ -411,7 +411,7 @@ define({ "api": [
     "groupTitle": "Card"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/cards/getCards",
     "title": "Get cards that are attached to account",
     "version": "1.0.0",
@@ -690,7 +690,7 @@ define({ "api": [
     "groupTitle": "Transaction"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/transactions/getFutureTransactions",
     "title": "Get future or periodic transactions",
     "version": "1.0.0",
@@ -736,7 +736,7 @@ define({ "api": [
     "groupTitle": "Transaction"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/transactions/getTransactions",
     "title": "Get transactions of the account",
     "version": "1.0.0",

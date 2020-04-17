@@ -12,10 +12,10 @@ public class TransactionRouter extends Router {
   public void handle(HttpExchange httpExchange) throws IOException {
     super.handle(httpExchange);
     switch (methodAddress) {
-      case "GET /transactions/getTransactions":
+      case "POST /transactions/getTransactions":
         routeGetTransactions();
         break;
-      case "GET /transactions/getFutureTransactions":
+      case "POST /transactions/getFutureTransactions":
         routeGetFutureTransactions();
         break;
       case "DELETE /transactions/deleteFutureTransaction":
@@ -28,7 +28,7 @@ public class TransactionRouter extends Router {
   }
 
   /**
-   * @api {get} /transactions/getTransactions Get transactions of the account
+   * @api {post} /transactions/getTransactions Get transactions of the account
    * @apiVersion 1.0.0
    * @apiName getTransactions
    * @apiGroup Transaction
@@ -74,7 +74,7 @@ public class TransactionRouter extends Router {
   }
 
   /**
-   * @api {get} /transactions/getFutureTransactions Get future or periodic transactions
+   * @api {post} /transactions/getFutureTransactions Get future or periodic transactions
    * @apiVersion 1.0.0
    * @apiName getFutureTransactions
    * @apiGroup Transaction

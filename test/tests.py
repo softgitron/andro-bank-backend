@@ -77,14 +77,14 @@ def test_007():
     print("Get all cards for specific account.")
     json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
     return_value = '[{"cardId":*,"cardNumber":*,"accountId":*,"withdrawLimit":0,"spendingLimit":0,"area":""}]'
-    r = c.new_request("GET", "/cards/getCards", payload=json_data, authentication=True)
+    r = c.new_request("POST", "/cards/getCards", payload=json_data, authentication=True)
     return expect(r, code=200, return_value=return_value, wildcard_maximum=22)
 
 
 def test_008():
     print("Try to get card information from imaginary account")
     json_data = '{"accountId":99999999}'
-    r = c.new_request("GET", "/cards/getCards", payload=json_data)
+    r = c.new_request("POST", "/cards/getCards", payload=json_data)
     return expect(r, code=401, return_value="Authentication is invalid.")
 
 
@@ -115,7 +115,7 @@ def test_011():
     json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
     return_value = '[{"toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH","amount":50000,"time":"*","type":"Deposit"}]'
     r = c.new_request(
-        "GET", "/transactions/getTransactions", payload=json_data, authentication=True
+        "POST", "/transactions/getTransactions", payload=json_data, authentication=True
     )
     return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
 
@@ -143,7 +143,7 @@ def test_014():
 {"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":"*","type":"Withdraw"},\
 {"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":"*","type":"Payment"}]"""
     r = c.new_request(
-        "GET", "/transactions/getTransactions", payload=json_data, authentication=True
+        "POST", "/transactions/getTransactions", payload=json_data, authentication=True
     )
     return expect(r, code=200, return_value=return_value, wildcard_maximum=30)
 
@@ -207,7 +207,7 @@ def test_020():
 "fromAccountIban":"*","fromAccountBic":"DEALFIHH","toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH",\
 "amount":10000}]"""
     r = c.new_request(
-        "GET",
+        "POST",
         "/transactions/getFutureTransactions",
         payload=json_data,
         authentication=True,

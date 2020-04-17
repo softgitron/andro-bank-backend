@@ -18,7 +18,7 @@ public class CardRouter extends Router {
       case "POST /cards/createCard":
         routeCreateCard();
         break;
-      case "GET /cards/getCards":
+      case "POST /cards/getCards":
         routeGetCards();
         break;
       case "POST /cards/withdraw":
@@ -80,7 +80,7 @@ public class CardRouter extends Router {
   }
 
   /**
-   * @api {get} /cards/getCards Get cards that are attached to account
+   * @api {post} /cards/getCards Get cards that are attached to account
    * @apiVersion 1.0.0
    * @apiName getCards
    * @apiGroup Card
