@@ -887,6 +887,14 @@
         "Parameter": [
           {
             "group": "Parameter",
+            "type": "Number",
+            "size": "0..",
+            "optional": false,
+            "field": "bankId",
+            "description": "<p>Id of the bank</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "String",
             "size": "3..",
             "optional": false,
@@ -897,7 +905,7 @@
             "group": "Parameter",
             "type": "String",
             "size": "12..",
-            "optional": true,
+            "optional": false,
             "field": "password",
             "description": "<p>Password of the new user</p>"
           }

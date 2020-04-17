@@ -16,7 +16,7 @@
       "name": "Debug (Launch) server",
       "request": "launch",
       "mainClass": "${workspaceFolder}/server/src/main/java/com/server/Server.java",
-      "env": { "PORT": "4040" }
+      "env": { "PORT": "8080" }
     }
   ]
 }

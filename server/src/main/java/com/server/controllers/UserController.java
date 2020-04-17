@@ -117,13 +117,18 @@ public class UserController extends Controller {
 
   // Checks email and password for login
   // Returns new authentication token
-  public static Response controllerLogin(String email, String password) {
+  public static Response controllerLogin(User loginUser) {
     try {
-      User user = UserDatabase.retrieveUser(email);
+      User user = UserDatabase.retrieveUser(loginUser.email);
+
+      // Check that user has correct bank
+      if (user.bankId != loginUser.bankId) {
+        return new Response(401, loginError, Response.ResponseType.TEXT);
+      }
       String[] information = user.password.split("\\$", 2);
       byte[] hash = Base64.decode(information[0]);
       byte[] salt = Base64.decode(information[1]);
-      byte[] hashToCompare = hashPassword(password, salt);
+      byte[] hashToCompare = hashPassword(loginUser.password, salt);
 
       // https://www.tutorialspoint.com/java/util/arrays_equals_byte.htm
       if (Arrays.equals(hash, hashToCompare)) {

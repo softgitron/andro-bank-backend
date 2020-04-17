@@ -25,7 +25,7 @@ def test_002():
 
 def test_003():
     print("Login with new details")
-    json_data = '{"email":"henry.master@gmail.com","password":"Hello"}'
+    json_data = '{"bankId":0,"email":"henry.master@gmail.com","password":"Hello"}'
     return_value = '{"userId":*,"username":"Henry","firstName":"Henry","lastName":"Larson","email":"henry.master@gmail.com","phoneNumber":"2451156481","bankId":0}'
     r = c.new_request("POST", "/users/login", payload=json_data)
     return expect(r, code=200, return_value=return_value)

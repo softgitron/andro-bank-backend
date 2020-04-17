@@ -148,8 +148,9 @@ public class UserRouter extends Router {
    * @apiName login
    * @apiGroup User
    *
+   * @apiParam {Number{0..}} bankId Id of the bank
    * @apiParam {String{3..}} email Username of the new user
-   * @apiParam {String{12..}} [password] Password of the new user
+   * @apiParam {String{12..}} password Password of the new user
    *
    * @apiHeaderExample Success-Response:
    * HTTP/1.1 200 OK
@@ -172,16 +173,14 @@ public class UserRouter extends Router {
     // Validate provided information with regexes
     // Might not be definitive solution but better than nothing.
     if (
+      user.bankId != null &&
       user.email != null &&
       user.email.matches(EMAIL_REGEX) &&
       user.password != null &&
       user.password.matches(PASSWORD_REGEX)
     ) {
       // Go to controller and handle request
-      Response response = UserController.controllerLogin(
-        user.email,
-        user.password
-      );
+      Response response = UserController.controllerLogin(user);
       sendResponse(response);
     } else {
       sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
