@@ -33,8 +33,8 @@ def test_003():
 
 def test_004():
     print("Create two new accounts")
-    json_data = '{"type":"Normal"}'
-    return_value = '{"accountId":*,"iban":"*","balance":0}'
+    json_data = ""
+    return_value = '{"accountId":*,"iban":"*","balance":0,"type":"Normal"}'
     r = c.new_request(
         "POST", "/accounts/createAccount", payload=json_data, authentication=True,
     )

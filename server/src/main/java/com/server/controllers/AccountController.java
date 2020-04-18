@@ -35,6 +35,9 @@ public class AccountController extends Controller {
     Account account,
     Token authorization
   ) {
+    account = (account != null) ? account : new Account();
+    account.type = (account.type != null) ? account.type : AccountType.Normal;
+
     // Let's generate new iban
     Random r = new Random();
     String iban = String.format(
@@ -53,6 +56,7 @@ public class AccountController extends Controller {
         account.type
       );
       Account returnValues = new Account();
+      returnValues.type = account.type;
       returnValues.accountId = accountId;
       returnValues.iban = iban;
       returnValues.balance = 0;

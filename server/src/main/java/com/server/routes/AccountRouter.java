@@ -68,9 +68,11 @@ public class AccountRouter extends Router {
    *
    * @apiHeader {String} x-access-token authentication token of the session.
    *
+   * @apiParam {String{6..7}} [type=Normal] Type of the account that will be created
+   *
    * @apiSuccessExample Success-Response:
    *     HTTP/1.1 201 OK
-   * {"accountId":1,"iban":"FI02 4597 4268 1567 54","balance":0}
+   * {"accountId":1,"iban":"FI02 4597 4268 1567 54","balance":0,"type":"Normal"}
    *
    */
   private void routeCreateAccount() {
@@ -83,11 +85,6 @@ public class AccountRouter extends Router {
     try {
       account = (Account) decodeJson(Account.class);
     } catch (Exception e) {
-      sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
-      return;
-    }
-
-    if (account.type == null) {
       sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);
       return;
     }

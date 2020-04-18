@@ -19,11 +19,26 @@ define({ "api": [
         ]
       }
     },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "size": "6..7",
+            "optional": true,
+            "field": "type",
+            "defaultValue": "Normal",
+            "description": "<p>Type of the account that will be created</p>"
+          }
+        ]
+      }
+    },
     "success": {
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 201 OK\n{\"accountId\":1,\"iban\":\"FI02 4597 4268 1567 54\",\"balance\":0}",
+          "content": "    HTTP/1.1 201 OK\n{\"accountId\":1,\"iban\":\"FI02 4597 4268 1567 54\",\"balance\":0,\"type\":\"Normal\"}",
           "type": "json"
         }
       ]
