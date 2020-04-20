@@ -88,17 +88,17 @@ public class UserRouter extends Router {
   }
 
   /**
-   * @api {post} /users/updateUserDetails Update details of the user
+   * @api {patch} /users/updateUserDetails Update details of the user
    * @apiVersion 1.0.0
    * @apiName updateUserDetails
    * @apiGroup User
    *
-   * @apiParam {String{3..}} [username] Username of the new user
-   * @apiParam {String{3..}} [firstName] First name of the new user
-   * @apiParam {String{3..}} [lastName] Last name of the new user
-   * @apiParam {String{6..}} [email] Email of the new user
-   * @apiParam {String{6..}} [phoneNumber] Phonenumber of the new user
-   * @apiParam {String{12..}} [password] Password of the new user
+   * @apiParam {String{3..}} [username] Username of the updated user
+   * @apiParam {String{3..}} [firstName] First name of the updated user
+   * @apiParam {String{3..}} [lastName] Last name of the updated user
+   * @apiParam {String{6..}} [email] Email of the updated user
+   * @apiParam {String{6..}} [phoneNumber] Phonenumber of the updated user
+   * @apiParam {String{12..}} [password] Password of the updated user
    *
    * @apiSuccessExample Success-Response:
    *     HTTP/1.1 201 OK

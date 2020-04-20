@@ -949,7 +949,7 @@
     "groupTitle": "User"
   },
   {
-    "type": "post",
+    "type": "patch",
     "url": "/users/updateUserDetails",
     "title": "Update details of the user",
     "version": "1.0.0",
@@ -964,7 +964,7 @@
             "size": "3..",
             "optional": true,
             "field": "username",
-            "description": "<p>Username of the new user</p>"
+            "description": "<p>Username of the updated user</p>"
           },
           {
             "group": "Parameter",
@@ -972,7 +972,7 @@
             "size": "3..",
             "optional": true,
             "field": "firstName",
-            "description": "<p>First name of the new user</p>"
+            "description": "<p>First name of the updated user</p>"
           },
           {
             "group": "Parameter",
@@ -980,7 +980,7 @@
             "size": "3..",
             "optional": true,
             "field": "lastName",
-            "description": "<p>Last name of the new user</p>"
+            "description": "<p>Last name of the updated user</p>"
           },
           {
             "group": "Parameter",
@@ -988,7 +988,7 @@
             "size": "6..",
             "optional": true,
             "field": "email",
-            "description": "<p>Email of the new user</p>"
+            "description": "<p>Email of the updated user</p>"
           },
           {
             "group": "Parameter",
@@ -996,7 +996,7 @@
             "size": "6..",
             "optional": true,
             "field": "phoneNumber",
-            "description": "<p>Phonenumber of the new user</p>"
+            "description": "<p>Phonenumber of the updated user</p>"
           },
           {
             "group": "Parameter",
@@ -1004,7 +1004,7 @@
             "size": "12..",
             "optional": true,
             "field": "password",
-            "description": "<p>Password of the new user</p>"
+            "description": "<p>Password of the updated user</p>"
           }
         ]
       }
