@@ -93,6 +93,8 @@ public class UserRouter extends Router {
    * @apiName updateUserDetails
    * @apiGroup User
    *
+   * @apiHeader {String} x-access-token authentication token of the session.
+   *
    * @apiParam {String{3..}} [username] Username of the updated user
    * @apiParam {String{3..}} [firstName] First name of the updated user
    * @apiParam {String{3..}} [lastName] Last name of the updated user
