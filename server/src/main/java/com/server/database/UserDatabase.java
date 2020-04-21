@@ -54,6 +54,7 @@ public class UserDatabase {
   // Update user details based on the parameters
   // Returns nothing
   public static void updateUser(
+    Integer userId,
     String username,
     String firstName,
     String lastName,
@@ -65,7 +66,7 @@ public class UserDatabase {
     Connection connection = DatabaseConnection.getConnection();
 
     PreparedStatement statement = connection.prepareStatement(
-      "UPDATE Users SET userName = ?, firstName = ?, lastName = ?, email = ?, phoneNumber = ?, password = ? WHERE email = ?"
+      "UPDATE Users SET userName = ?, firstName = ?, lastName = ?, email = ?, phoneNumber = ?, password = ? WHERE userId = ?"
     );
     statement.setString(1, username);
     statement.setString(2, firstName);
@@ -73,7 +74,7 @@ public class UserDatabase {
     statement.setString(4, email);
     statement.setString(5, phoneNumber);
     statement.setString(6, hashedPassword);
-    statement.setString(7, email);
+    statement.setInt(7, userId);
     statement.executeUpdate();
 
     statement.close();

@@ -98,6 +98,7 @@ public class UserController extends Controller {
 
     try {
       UserDatabase.updateUser(
+        authorization.userId,
         preparedDetails.username,
         preparedDetails.firstName,
         preparedDetails.lastName,
