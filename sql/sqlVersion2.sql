@@ -62,7 +62,7 @@ CREATE TABLE olio1.Card
     accountId INT NOT NULL,
     withdrawLimit INT,
     spendingLimit INT,
-    area VARCHAR(15),
+    area VARCHAR(32),
     FOREIGN KEY (accountId)
         REFERENCES olio1.Account (accountId)
         ON DELETE CASCADE
