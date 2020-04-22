@@ -9,7 +9,6 @@ import com.sun.net.httpserver.*;
 import java.io.IOException;
 
 public class CardRouter extends Router {
-  private final String AREA_REGEX = "^FI|SWE|GB|$";
 
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
@@ -68,10 +67,7 @@ public class CardRouter extends Router {
       return;
     }
 
-    if (
-      newCard.accountId != null &&
-      (newCard.area == null || newCard.area.matches(AREA_REGEX))
-    ) {
+    if (newCard.accountId != null) {
       Response response = CardController.controllerCreateCard(newCard);
       sendResponse(response);
     } else {
