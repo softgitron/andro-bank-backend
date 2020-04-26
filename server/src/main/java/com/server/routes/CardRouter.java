@@ -68,7 +68,10 @@ public class CardRouter extends Router {
     }
 
     if (newCard.accountId != null) {
-      Response response = CardController.controllerCreateCard(newCard);
+      Response response = CardController.controllerCreateCard(
+        newCard,
+        authorization
+      );
       sendResponse(response);
     } else {
       sendResponse(400, API_PARAMETER_ERROR, Response.ResponseType.TEXT);

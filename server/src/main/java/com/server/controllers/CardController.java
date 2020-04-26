@@ -2,6 +2,7 @@ package com.server.controllers;
 
 import com.server.authentication.Token;
 import com.server.containers.Account;
+import com.server.containers.Account.AccountType;
 import com.server.containers.Card;
 import com.server.containers.Transaction;
 import com.server.containers.Transaction.TransactionType;
@@ -18,7 +19,10 @@ public class CardController extends Controller {
 
   // Creates new card and attaches it to the account
   // Returns details of the new card
-  public static Response controllerCreateCard(Card newCard) {
+  public static Response controllerCreateCard(
+    Card newCard,
+    Token authorization
+  ) {
     // If no limits are given set default
     newCard = sanitizeParameters(newCard);
 
@@ -32,6 +36,25 @@ public class CardController extends Controller {
       r.nextInt(9999)
     );
     newCard.cardNumber = cardNumber;
+
+    // Check that account and user matches
+    // Also check that account type is not savings
+    Account account = userOwnsAccount(newCard.accountId, authorization.userId);
+    if (account == null) {
+      return new Response(
+        401,
+        "Card can't be added to account you don't own.",
+        Response.ResponseType.TEXT
+      );
+    }
+
+    if (account.type == AccountType.Savings) {
+      return new Response(
+        400,
+        "Card can't be added to account that has savings type.",
+        Response.ResponseType.TEXT
+      );
+    }
 
     try {
       Integer cardId = CardDatabase.insertCard(
