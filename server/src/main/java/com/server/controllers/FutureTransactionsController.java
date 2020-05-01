@@ -44,6 +44,14 @@ public class FutureTransactionsController extends Controller {
           continue;
         }
 
+        // Check that receiver is not same account
+        if (fromAccount.iban.equals(toAccount.iban)) {
+          TransactionDatabase.deleteFutureTransaction(
+            futureTransaction.futureTransferId
+          );
+          return;
+        }
+
         // Check that there is enough balance on the sender account
         if (
           !withdrawCanBeMade(

@@ -167,7 +167,8 @@ define({ "api": [
           },
           {
             "group": "Parameter",
-            "type": "Date",
+            "type": "Number",
+            "size": "1..",
             "optional": false,
             "field": "atTime",
             "description": "<p>When transaction should occur (for the first time)</p>"
@@ -742,7 +743,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n[{\"toAccountId\":1,\"toAccountIban\":\"FI24 5864 8568 9554 87\",\"toAccountBic\":\"DEALFIHH\",\n\"amount\":50000,\"time\":\"1.5.2020 15:41 PM\",\"type\":\"Deposit\"},\n{\"fromAccountId\":2,\"fromAccountIban\":\"FI58 9348 5687 5324 67\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":\"1.5.2020 18:45 PM\",\"type\":\"Withdraw\"},\n{\"fromAccountId\":3,\"fromAccountIban\":\"FI98 2357 8654 1598 65\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":\"1.5.2020 20:50 PM\",\"type\":\"Payment\"}]",
+          "content": "    HTTP/1.1 200 OK\n[{\"toAccountId\":1,\"toAccountIban\":\"FI24 5864 8568 9554 87\",\"toAccountBic\":\"DEALFIHH\",\n\"amount\":50000,\"time\":\"1.5.2020 15:41 PM\",\"type\":\"Deposit\"},\n{\"fromAccountId\":2,\"fromAccountIban\":\"FI58 9348 5687 5324 67\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":1588338156,\"type\":\"Withdraw\"},\n{\"fromAccountId\":3,\"fromAccountIban\":\"FI98 2357 8654 1598 65\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":1588338156,\"type\":\"Payment\"}]",
           "type": "json"
         }
       ]
@@ -788,7 +789,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "    HTTP/1.1 200 OK\n[{\"toAccountId\":1,\"toAccountIban\":\"FI24 5864 8568 9554 87\",\"toAccountBic\":\"DEALFIHH\",\n\"amount\":50000,\"time\":\"1.5.2020 15:41 PM\",\"type\":\"Deposit\"},\n{\"fromAccountId\":2,\"fromAccountIban\":\"FI58 9348 5687 5324 67\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":\"1.5.2020 18:45 PM\",\"type\":\"Withdraw\"},\n{\"fromAccountId\":3,\"fromAccountIban\":\"FI98 2357 8654 1598 65\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":\"1.5.2020 20:50 PM\",\"type\":\"Payment\"}]",
+          "content": "    HTTP/1.1 200 OK\n[{\"toAccountId\":1,\"toAccountIban\":\"FI24 5864 8568 9554 87\",\"toAccountBic\":\"DEALFIHH\",\n\"amount\":50000,\"time\":\"1.5.2020 15:41 PM\",\"type\":\"Deposit\"},\n{\"fromAccountId\":2,\"fromAccountIban\":\"FI58 9348 5687 5324 67\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":1588338156,\"type\":\"Withdraw\"},\n{\"fromAccountId\":3,\"fromAccountIban\":\"FI98 2357 8654 1598 65\",\"fromAccountBic\":\"DEALFIHH\",\n\"cardId\":1,\"cardNumber\":\"1254 8658 9425 7896\",\"amount\":10000,\"time\":1588338156,\"type\":\"Payment\"}]",
           "type": "json"
         }
       ]

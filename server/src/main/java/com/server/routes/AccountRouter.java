@@ -222,7 +222,7 @@ public class AccountRouter extends Router {
    * @apiParam {Number{1..}} amount Amount that should be tranferred
    * @apiParam {Number{1..}} [atInterval=null] How often in minutes transaction should occur
    * @apiParam {Number{1..}} [times=null] How many times trnsfer should occur
-   * @apiParam {Date} atTime When transaction should occur (for the first time)
+   * @apiParam {Number{1..}} atTime When transaction should occur (for the first time)
    *
    * @apiSuccessExample Success-Response:
    *     HTTP/1.1 201 OK

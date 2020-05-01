@@ -1,6 +1,14 @@
 package com.server.routes;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import com.server.authentication.Authentication;
 import com.server.authentication.Token;
@@ -10,7 +18,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public abstract class Router implements HttpHandler {
@@ -24,6 +34,37 @@ public abstract class Router implements HttpHandler {
   protected HttpExchange httpExchange;
   protected Token authorization;
   protected String methodAddress;
+
+  // https://stackoverflow.com/questions/6873020/gson-date-format
+  private static JsonSerializer<Date> ser = new JsonSerializer<Date>() {
+
+    @Override
+    public JsonElement serialize(
+      Date src,
+      Type typeOfSrc,
+      JsonSerializationContext context
+    ) {
+      return src == null ? null : new JsonPrimitive(src.getTime());
+    }
+  };
+
+  private static JsonDeserializer<Date> deser = new JsonDeserializer<Date>() {
+
+    @Override
+    public Date deserialize(
+      JsonElement json,
+      Type typeOfT,
+      JsonDeserializationContext context
+    )
+      throws JsonParseException {
+      if (json != null) {
+        Date date = new Date(json.getAsLong());
+        return date;
+      } else {
+        return null;
+      }
+    }
+  };
 
   // Must be alway called from inherited classes
   // Does basic preparations for routing like authentication
@@ -63,7 +104,10 @@ public abstract class Router implements HttpHandler {
       throw new Exception("IOException while receiving");
     }
     String jsonString = jsonBuilder.toString();
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder()
+      .registerTypeAdapter(Date.class, ser)
+      .registerTypeAdapter(Date.class, deser)
+      .create();
     Object results = null;
     try {
       results = gson.fromJson(jsonString, toClass);
@@ -95,7 +139,10 @@ public abstract class Router implements HttpHandler {
     if (response.responseData instanceof String) {
       responseData = (String) response.responseData;
     } else {
-      Gson gson = new Gson();
+      Gson gson = new GsonBuilder()
+        .registerTypeAdapter(Date.class, ser)
+        .registerTypeAdapter(Date.class, deser)
+        .create();
       responseData = gson.toJson(response.responseData);
     }
     List<String> type = new ArrayList<String>();

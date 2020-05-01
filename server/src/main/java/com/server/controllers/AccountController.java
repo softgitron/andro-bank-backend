@@ -159,6 +159,15 @@ public class AccountController extends Controller {
         );
       }
 
+      // Check that receiver is not same account
+      if (fromAccount.iban.equals(toAccount.iban)) {
+        return new Response(
+          400,
+          "From and to account can't be same.",
+          Response.ResponseType.TEXT
+        );
+      }
+
       // Execute transfer
       // Calculate balance
       fromAccount.balance -= transaction.amount;

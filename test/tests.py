@@ -17,7 +17,7 @@ def test_001():
 
 def test_002():
     print("Create new user with details.")
-    json_data = '{"bankId":0,"email":"henry.master@gmail.com","password":"Hello","phoneNumber":"2451156481","username":"Henry","firstName":"Henry","lastName":"Larson"}'
+    json_data = '{"bankId":0,"email":"henry.master@gmail.com","password":"GoodPassword123!@","phoneNumber":"2451156481","username":"Henry","firstName":"Henry","lastName":"Larson"}'
     return_value = '{"username":"Henry","firstName":"Henry","lastName":"Larson","email":"henry.master@gmail.com","phoneNumber":"2451156481","bankId":0}'
     r = c.new_request("POST", "/users/createUser", payload=json_data)
     return expect(r, code=201, return_value=return_value, authentication_header=True)
@@ -25,7 +25,9 @@ def test_002():
 
 def test_003():
     print("Login with new details")
-    json_data = '{"bankId":0,"email":"henry.master@gmail.com","password":"Hello"}'
+    json_data = (
+        '{"bankId":0,"email":"henry.master@gmail.com","password":"GoodPassword123!@"}'
+    )
     return_value = '{"userId":*,"username":"Henry","firstName":"Henry","lastName":"Larson","email":"henry.master@gmail.com","phoneNumber":"2451156481","bankId":0}'
     r = c.new_request("POST", "/users/login", payload=json_data)
     return expect(r, code=200, return_value=return_value)
@@ -113,7 +115,7 @@ def test_010():
 def test_011():
     print("Get all transactions (1)")
     json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
-    return_value = '[{"toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH","amount":50000,"time":"*","type":"Deposit"}]'
+    return_value = '[{"toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH","amount":50000,"time":*,"type":"Deposit"}]'
     r = c.new_request(
         "POST", "/transactions/getTransactions", payload=json_data, authentication=True
     )
@@ -139,9 +141,9 @@ def test_013():
 def test_014():
     print("Check once more that everything is registering to transactions.")
     json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
-    return_value = """[{"toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH","amount":50000,"time":"*","type":"Deposit"},\
-{"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":"*","type":"Withdraw"},\
-{"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":"*","type":"Payment"}]"""
+    return_value = """[{"toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH","amount":50000,"time":*,"type":"Deposit"},\
+{"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":*,"type":"Withdraw"},\
+{"fromAccountId":*,"fromAccountIban":"*","fromAccountBic":"DEALFIHH","cardId":*,"cardNumber":"*","amount":10000,"time":*,"type":"Payment"}]"""
     r = c.new_request(
         "POST", "/transactions/getTransactions", payload=json_data, authentication=True
     )
@@ -192,7 +194,7 @@ def test_018():
 
 def test_019():
     print("Make periodic future transaction")
-    json_data = f'{{"fromAccountId":{temporary_values["accountId"]},"toAccountIban":"{temporary_values["toIban"]}","amount":10000,"atInterval":1,"times":2,"atTime":"Apr 16, 2020, 2:20:28 PM"}}'
+    json_data = f'{{"fromAccountId":{temporary_values["accountId"]},"toAccountIban":"{temporary_values["toIban"]}","amount":10000,"atInterval":1,"times":2,"atTime":10000000000}}'
     return_value = "OK"
     r = c.new_request(
         "POST", "/accounts/futureTransfer", payload=json_data, authentication=True
@@ -203,7 +205,7 @@ def test_019():
 def test_020():
     print("Get all periodic future transactions")
     json_data = f'{{"accountId":{temporary_values["accountId"]}}}'
-    return_value = """[{"futureTransferId":*,"atInterval":1,"times":2,"atTime":"*","fromAccountId":*,\
+    return_value = """[{"futureTransferId":*,"atInterval":1,"times":2,"atTime":*,"fromAccountId":*,\
 "fromAccountIban":"*","fromAccountBic":"DEALFIHH","toAccountId":*,"toAccountIban":"*","toAccountBic":"DEALFIHH",\
 "amount":10000}]"""
     r = c.new_request(

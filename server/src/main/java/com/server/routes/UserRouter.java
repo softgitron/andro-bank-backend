@@ -11,7 +11,10 @@ public class UserRouter extends Router {
   private final String EMAIL_REGEX =
     "^[A-Za-z0-9_.]{2,}@[A-Za-z0-9_]{2,}\\.[A-Za-z]{2,3}$";
   private final String PHONE_NUMBER_REGEX = "^\\+?[0-9]{6,12}$";
-  private final String PASSWORD_REGEX = ".{5,}";
+
+  // https://www.javacodeexamples.com/java-regular-expression-password-validation-example/519
+  private final String PASSWORD_REGEX =
+    "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[^\\w\\s]).{12,60}$";
 
   @Override
   public void handle(HttpExchange httpExchange) throws IOException {
